@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77861d009e93b41f988ed08909739504, type: 3}
+  m_Name: UISettings
+  m_EditorClassIdentifier: 
+  templateUIPrefab: {fileID: 40960105698032243, guid: becbf8355de0a4afebfa8962b8351d6d, type: 3}
+  screensToRegister:
+  - {fileID: 3364515801504751194, guid: 332eae1bef04d44669df795320a30e25, type: 3}
+  - {fileID: 7633095124715605579, guid: 4c24215c9e44c4f648367dff696eb3b6, type: 3}
+  - {fileID: 2071983094495119502, guid: d838061e25df945d9a590ce496c22ebb, type: 3}
+  - {fileID: 1226495306468293805, guid: 71e7a4f2ce48f42f3a0d47993bc35fc6, type: 3}
+  - {fileID: 6239844366527178385, guid: 5b5302009ba44405680bd3f473b01383, type: 3}
+  - {fileID: 2343108394741864914, guid: cde1b166eb1594dc2882d49218804d52, type: 3}
+  - {fileID: 3542800864921880313, guid: 6726e695224214a268c5eafb96d93196, type: 3}
+  deactivateScreenGOs: 1

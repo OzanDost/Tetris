@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 831d5450f8984f61bcbefd13297c1a77, type: 3}
+  m_Name: Pool Config
+  m_EditorClassIdentifier: 
+  items:
+  - Piece: {fileID: 1682664971939025248, guid: 97c79b9357c19499ca00755cee21ec94, type: 3}
+    InitialGenerationCount: 50
+  - Piece: {fileID: 3054316291585520685, guid: f8c8baee8447f4340a0c359838eaa18f, type: 3}
+    InitialGenerationCount: 50
+  - Piece: {fileID: 3807390754583654037, guid: 5a850277841a94ec4ae20cd0f4a5f515, type: 3}
+    InitialGenerationCount: 50
+  - Piece: {fileID: 3324923440365077260, guid: d2755f0acb1044c92b58076dbfa2601f, type: 3}
+    InitialGenerationCount: 50
+  - Piece: {fileID: 2646123264338977967, guid: bb5bc63cefb5b4987b16f0ebec6d6e16, type: 3}
+    InitialGenerationCount: 50
+  - Piece: {fileID: 60461461798054144, guid: e29a6cc958d894bf287cd90d4765e7ae, type: 3}
+    InitialGenerationCount: 0
+  - Piece: {fileID: 4394803589209074029, guid: 92667fa0706274615b16fe018dd05737, type: 3}
+    InitialGenerationCount: 50
