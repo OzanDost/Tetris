@@ -54,8 +54,10 @@ namespace Game.Managers
 
             //todo maybe refine here
             var piece = Instantiate(_poolConfig.Items.Find(x => x.Piece.PieceType == pieceType).Piece, transform);
+            piece.gameObject.SetActive(false);
             piece.IsInPool = false;
             piece.OnSpawn();
+            list.Add(piece);
             return piece;
         }
 

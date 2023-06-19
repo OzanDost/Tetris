@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Enums;
 using ThirdParty;
 using UnityEngine;
 
@@ -21,16 +22,25 @@ namespace Game.Managers
             Signals.Get<SoloModeButtonClicked>().AddListener(OnSoloModeButtonClicked);
             Signals.Get<MultiplayerModeButtonClicked>().AddListener(OnMultiplayerModeButtonClicked);
 
+            //todo change here
+            Signals.Get<PlayButtonClicked>().AddListener(OnPlayButtonClicked);
+
             ChangeGameState(GameState.Loading);
 
 
+            ConfigHelper.Initialize();
             ScoreManager.Initialize();
             SaveManager.Initialize();
         }
 
+        private void OnPlayButtonClicked()
+        {
+            ChangeGameState(GameState.Gameplay);
+            Signals.Get<GameplayStarted>().Dispatch(GameMode.Solo);
+        }
+
         private void OnMultiplayerModeButtonClicked()
         {
-            
         }
 
         private void OnSoloModeButtonClicked()
@@ -103,15 +113,5 @@ namespace Game.Managers
             }
 #endif
         }
-    }
-
-    public enum GameState
-    {
-        None,
-        Loading,
-        Menu,
-        Gameplay,
-        Success,
-        Fail,
     }
 }

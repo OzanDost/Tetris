@@ -1,3 +1,4 @@
+using Enums;
 using Game.Managers;
 using ThirdParty;
 using ThirdParty.uiframework;
@@ -20,6 +21,7 @@ namespace UI.Managers
             // Subscribing to events
             Signals.Get<GameStateChanged>().AddListener(GameManager_OnGameStateChanged);
         }
+
         private void GameManager_OnGameStateChanged(GameState oldState, GameState newState)
         {
             if (newState == GameState.Loading)
@@ -36,6 +38,11 @@ namespace UI.Managers
             if (newState == GameState.Fail)
             {
                 _uiFrame.OpenWindow("FailPopup");
+            }
+
+            if (newState == GameState.Gameplay)
+            {
+                _uiFrame.OpenWindow("GameplayWindow");
             }
         }
     }

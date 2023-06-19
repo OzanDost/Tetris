@@ -1,4 +1,3 @@
-using System;
 using Enums;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -9,20 +8,22 @@ namespace Game.Managers
     {
         private bool _isGameStarted;
         private Piece _currentPiece;
+        private Vector2 _inputVector;
 
         [Button]
         public void Initialize()
         {
             _isGameStarted = true;
+            _inputVector.y = -0.1f;
 
+            ConfigHelper.Initialize();
             GetRandomPiece();
         }
 
         private void GetRandomPiece()
         {
             _currentPiece =
-                PoolManager.Instance.GetPiece(
-                    (PieceType)UnityEngine.Random.Range(0, Enum.GetValues(typeof(PieceType)).Length));
+                PoolManager.Instance.GetPiece(ConfigHelper.GetRandomPieceType());
             _currentPiece.transform.position = Vector3.up * 30f;
             _currentPiece.gameObject.SetActive(true);
 
@@ -41,13 +42,12 @@ namespace Game.Managers
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                _currentPiece.Move(Vector2.left * 10);
-                Debug.Log("Left");
+                _currentPiece.Move(Vector2.left, 5f);
+                _inputVector.x = -1f;
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                _currentPiece.Move(Vector2.right * 10);
-                Debug.Log("Right");
+                _inputVector.x = 1f;
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
@@ -55,14 +55,18 @@ namespace Game.Managers
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                _currentPiece.Move(Vector2.down);
+                _inputVector.y = -1f;
             }
         }
 
         private void FixedUpdate()
         {
-            // if (_currentPiece != null)
-                // _currentPiece.Move(Vector2.down * 0.1f);
+            if (_currentPiece != null)
+            {
+                _currentPiece.Move(_inputVector, 5f);
+                if (_inputVector.x != 0) _inputVector.x = 0f;
+                if (_inputVector.y != -0.1f) _inputVector.y = -0.1f;
+            }
         }
     }
 }

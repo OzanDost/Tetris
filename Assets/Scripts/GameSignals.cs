@@ -1,4 +1,4 @@
-using Game.Managers;
+using Enums;
 using ThirdParty;
 
 /// <summary>
@@ -6,6 +6,8 @@ using ThirdParty;
 /// </summary>
 public class GameStateChanged : ASignal<GameState, GameState>{}
 public class RequestGameStateChange : ASignal<GameState>{}
+
+public class GameplayStarted : ASignal<GameMode>{}
 
 
 //UI Signals
