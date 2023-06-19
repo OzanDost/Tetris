@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Data;
 using Enums;
 using Game.Managers;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace Game
         private Piece _lastPieceTouchedFinishLine;
         private Vector2 _movementInput;
 
+        [SerializeField] private Transform _pieceSpawnPoint;
         [SerializeField] private StageFinishLine _stageFinishLine;
         [SerializeField] private FallZone _fallZone;
 
@@ -52,6 +54,14 @@ namespace Game
                 _lastPieceTouchedFinishLine = piece;
                 Debug.Log("Stage changed");
             }
+
+            for (int i = 0; i < _currentPieceIndex; i++)
+            {
+                _pieces[i].Rigidbody2D.bodyType = RigidbodyType2D.Static;
+                //todo add shiny effect here;
+            }
+
+            _stageFinishLine.IncreaseHeight(ConfigHelper.Config.defaultStageHeight);
         }
 
         private void OnPieceFellOffBoard(Collider2D pieceCollider)
@@ -80,6 +90,7 @@ namespace Game
 
         private void ActivatePiece()
         {
+            CurrentPiece.transform.position = _pieceSpawnPoint.position;
             CurrentPiece.Activate();
             CurrentPiece.OnPieceStateChanged += OnPieceStateChanged;
         }
@@ -140,8 +151,9 @@ namespace Game
 
             // Calculate new position based on integer increments
             int xMovement = Mathf.RoundToInt(_movementInput.x);
+            float yMovement = piecePosition.y + _movementInput.y * 5f * Time.deltaTime;
             Vector2 newPosition = new Vector2(piecePosition.x + xMovement,
-                piecePosition.y + _movementInput.y * 5f * Time.deltaTime);
+                yMovement);
 
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
             _movementInput.x = 0f;

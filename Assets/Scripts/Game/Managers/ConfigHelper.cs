@@ -7,6 +7,7 @@ namespace Game.Managers
 {
     public static class ConfigHelper
     {
+        public static GameConfig Config => _config;
         private static GameConfig _config;
 
         public static void Initialize()

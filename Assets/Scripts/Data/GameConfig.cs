@@ -12,20 +12,23 @@ namespace Data
         #region Piece Configs
 
         public float HorizontalMoveSpeed => horizontalMoveSpeed;
-        private float horizontalMoveSpeed;
+        [SerializeField] private float horizontalMoveSpeed;
 
         public float VerticalMoveSpeed => verticalMoveSpeed;
-        private float verticalMoveSpeed;
+        [SerializeField] private float verticalMoveSpeed;
 
         public float VerticalFastMoveSpeed => verticalFastMoveSpeed;
-        private float verticalFastMoveSpeed;
+        [SerializeField] private float verticalFastMoveSpeed;
 
         #endregion
 
         #region Gameplay Configs
 
         public int[] StageHeights => _stageHeights;
-        private int[] _stageHeights;
+        [SerializeField] private int[] _stageHeights;
+
+        public int defaultStageHeight => _defaultStageHeight;
+        [SerializeField] private int _defaultStageHeight;
 
         #endregion
     }
