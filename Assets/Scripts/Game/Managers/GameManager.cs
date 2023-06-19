@@ -107,9 +107,6 @@ namespace Game.Managers
 #if UNITY_ANDROID || UNITY_IOS
             if (pauseStatus)
             {
-                BoardManager.SendLevelSaveRequest();
-                SaveManager.SaveHintCount();
-                SaveManager.SavePlayerStatsData();
             }
 #endif
         }
