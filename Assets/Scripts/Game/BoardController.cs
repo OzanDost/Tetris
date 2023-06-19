@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Enums;
 using Game.Managers;
 using UnityEngine;
@@ -9,10 +10,15 @@ namespace Game
     {
         private List<Piece> _pieces;
         private int _currentPieceIndex;
+        private int _currentStageIndex;
         private bool _isActive;
 
         public Piece CurrentPiece => _pieces[_currentPieceIndex];
+        private Piece _lastPieceTouchedFinishLine;
         private Vector2 _movementInput;
+
+        [SerializeField] private StageFinishLine _stageFinishLine;
+        [SerializeField] private FallZone _fallZone;
 
 
         private void Awake()
@@ -22,12 +28,54 @@ namespace Game
 
         private void Initialize()
         {
+            _stageFinishLine.PieceReachedStageTarget += OnPieceReachedStageTarget;
+            _fallZone.PieceFellOffBoard += OnPieceFellOffBoard;
+
+
             _pieces = new List<Piece>(250);
             _currentPieceIndex = 0;
+
             GeneratePieces();
+
             _isActive = true;
 
             ActivatePiece();
+        }
+
+        private void OnPieceReachedStageTarget(Collider2D pieceCollider)
+        {
+            if (BoardContainsCollider(pieceCollider, out Piece piece))
+            {
+                if (piece.State != PieceState.Placed) return;
+                if (piece == _lastPieceTouchedFinishLine) return;
+                _currentStageIndex++;
+                _lastPieceTouchedFinishLine = piece;
+                Debug.Log("Stage changed");
+            }
+        }
+
+        private void OnPieceFellOffBoard(Collider2D pieceCollider)
+        {
+            if (BoardContainsCollider(pieceCollider, out Piece piece))
+            {
+                //todo add mistake
+            }
+        }
+
+        private bool BoardContainsCollider(Collider2D pieceCollider, out Piece parentPiece)
+        {
+            for (int i = 0; i < _currentPieceIndex; i++)
+            {
+                var piece = _pieces[i];
+                if (piece.Colliders.Contains(pieceCollider))
+                {
+                    parentPiece = piece;
+                    return true;
+                }
+            }
+
+            parentPiece = null;
+            return false;
         }
 
         private void ActivatePiece()
@@ -41,11 +89,22 @@ namespace Game
             CurrentPiece.OnPieceStateChanged -= OnPieceStateChanged;
             if (oldState == PieceState.Active && newState == PieceState.Placed)
             {
-                _currentPieceIndex++;
-                //todo add new pieces if needed
-                ActivatePiece();
+                OnPiecePlaced();
             }
         }
+
+        private void OnPiecePlaced()
+        {
+            if (_currentPieceIndex + 1 >= _pieces.Count)
+            {
+                GeneratePieces(50);
+            }
+
+            _currentPieceIndex++;
+
+            ActivatePiece();
+        }
+
 
         public void ResetBoard()
         {
@@ -71,17 +130,24 @@ namespace Game
 
         public void ToggleVerticalSpeed(bool isSpeedy)
         {
-            _movementInput.y = isSpeedy ? -0.3f : -0.1f;
+            _movementInput.y = isSpeedy ? -1.5f : -0.5f;
         }
 
         private void FixedUpdate()
         {
             if (!_isActive) return;
             var piecePosition = CurrentPiece.Rigidbody2D.position;
-            CurrentPiece.Rigidbody2D.MovePosition(piecePosition + _movementInput * (4f * Time.fixedDeltaTime));
+
+            // Calculate new position based on integer increments
+            int xMovement = Mathf.RoundToInt(_movementInput.x);
+            Vector2 newPosition = new Vector2(piecePosition.x + xMovement,
+                piecePosition.y + _movementInput.y * 5f * Time.deltaTime);
+
+            CurrentPiece.Rigidbody2D.MovePosition(newPosition);
             _movementInput.x = 0f;
             _movementInput.y = -0.1f;
         }
+
 
         private void GeneratePieces(int amount = -1)
         {

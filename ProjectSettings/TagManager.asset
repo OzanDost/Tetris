@@ -13,9 +13,9 @@ TagManager:
   - UI
   - Piece
   - Ground
-  - 
-  - 
-  - 
+  - DeathZone
+  - PlacedPiece
+  - StageFinishLine
   - 
   - 
   - 

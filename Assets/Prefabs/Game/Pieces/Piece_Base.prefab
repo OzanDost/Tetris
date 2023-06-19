@@ -49,6 +49,12 @@ MonoBehaviour:
   _colliders: []
   _spriteRenderers: []
   _pieceType: 0
+  _defaultLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _placedLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!50 &447071945443442580
 Rigidbody2D:
   serializedVersion: 4

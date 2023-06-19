@@ -70,7 +70,6 @@ namespace Game
 
                 if (Mathf.Abs(delta.y) > 10f)
                 {
-                    // _playerBoardController.MovePieceHorizontally(delta);
                     _playerBoardController.ToggleVerticalSpeed(true);
                     _pieceMoved = true;
                     return;

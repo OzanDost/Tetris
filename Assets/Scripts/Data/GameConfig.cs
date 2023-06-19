@@ -1,5 +1,3 @@
-using System;
-using Enums;
 using UnityEngine;
 
 namespace Data
@@ -23,11 +21,12 @@ namespace Data
         private float verticalFastMoveSpeed;
 
         #endregion
-    }
 
+        #region Gameplay Configs
 
-    [Serializable]
-    public class PieceWeightsDictionary : SerializableDictionary<PieceType, int>
-    {
+        public int[] StageHeights => _stageHeights;
+        private int[] _stageHeights;
+
+        #endregion
     }
 }

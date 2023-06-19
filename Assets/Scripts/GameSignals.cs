@@ -1,13 +1,14 @@
 using Enums;
 using ThirdParty;
+using UnityEngine;
 
 /// <summary>
 /// First param is old state, second is new state
 /// </summary>
 public class GameStateChanged : ASignal<GameState, GameState>{}
 public class RequestGameStateChange : ASignal<GameState>{}
-
 public class GameplayStarted : ASignal<GameMode>{}
+
 
 
 //UI Signals
