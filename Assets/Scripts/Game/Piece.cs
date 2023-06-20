@@ -29,11 +29,13 @@ namespace Game
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            ToggleColliderTriggers(false);
-            ChangeState(PieceState.Placed);
+            if (_state == PieceState.Placed) return;
             _rigidbody2D.velocity = Vector2.zero;
             _rigidbody2D.angularVelocity = 0f;
             _rigidbody2D.gravityScale = 1f;
+
+            ChangeState(PieceState.Placed);
+            ToggleColliderTriggers(false);
         }
 
         private void ChangeState(PieceState newState)
@@ -103,6 +105,11 @@ namespace Game
             {
                 collider.isTrigger = value;
             }
+        }
+
+        public void SetRigidbodyMode(RigidbodyType2D mode)
+        {
+            _rigidbody2D.bodyType = mode;
         }
 
 #if UNITY_EDITOR

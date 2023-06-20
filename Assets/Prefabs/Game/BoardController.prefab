@@ -51,6 +51,7 @@ MonoBehaviour:
   _pieceSpawnPoint: {fileID: 329083328585785207}
   _stageFinishLine: {fileID: 7129977647950459576}
   _fallZone: {fileID: 5550680262277570124}
+  _ground: {fileID: 6534074332925128895}
 --- !u!1 &3344628010377252309
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,11 +13,11 @@ namespace Game
             PieceReachedStageTarget?.Invoke(other);
         }
 
-        public void SetHeight(int height)
+        public void SetLocalHeight(int height)
         {
-            var position = transform.position;
+            var position = transform.localPosition;
             position = new Vector3(position.x, height, position.z);
-            transform.position = position;
+            transform.localPosition = position;
             gameObject.SetActive(true);
         }
 

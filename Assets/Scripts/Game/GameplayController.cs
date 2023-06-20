@@ -1,4 +1,3 @@
-using System;
 using Enums;
 using Game.Managers;
 using ThirdParty;
@@ -75,10 +74,11 @@ namespace Game
                     return;
                 }
 
-                if (Mathf.Abs(delta.x) > 3f)
+                if (Mathf.Abs(delta.x) > 20f)
                 {
                     _playerBoardController.MovePieceHorizontally(InputManager.DeltaMousePosition);
                     _inputStartPos = currentInputPos;
+                    delta.x = 0;
                     _pieceMoved = true;
                     return;
                 }

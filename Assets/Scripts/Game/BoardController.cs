@@ -3,6 +3,7 @@ using System.Linq;
 using Data;
 using Enums;
 using Game.Managers;
+using ThirdParty;
 using UnityEngine;
 
 namespace Game
@@ -21,6 +22,7 @@ namespace Game
         [SerializeField] private Transform _pieceSpawnPoint;
         [SerializeField] private StageFinishLine _stageFinishLine;
         [SerializeField] private FallZone _fallZone;
+        [SerializeField] private Transform _ground;
 
 
         private void Awake()
@@ -32,16 +34,26 @@ namespace Game
         {
             _stageFinishLine.PieceReachedStageTarget += OnPieceReachedStageTarget;
             _fallZone.PieceFellOffBoard += OnPieceFellOffBoard;
-
-
+            
             _pieces = new List<Piece>(250);
             _currentPieceIndex = 0;
 
             GeneratePieces();
+            ArrangeBoard();
 
             _isActive = true;
 
             ActivatePiece();
+        }
+
+        private void ArrangeBoard()
+        {
+            _ground.localPosition = Vector3.zero;
+            _fallZone.transform.localPosition = new Vector3(0, -5f, 0);
+            _stageFinishLine.SetLocalHeight(ConfigHelper.Config.defaultStageHeight); //todo
+            _pieceSpawnPoint.localPosition = _stageFinishLine.transform.localPosition + Vector3.up * 5f;
+
+            Signals.Get<BoardArranged>().Dispatch(_ground, _pieceSpawnPoint);
         }
 
         private void OnPieceReachedStageTarget(Collider2D pieceCollider)
@@ -57,7 +69,7 @@ namespace Game
 
             for (int i = 0; i < _currentPieceIndex; i++)
             {
-                _pieces[i].Rigidbody2D.bodyType = RigidbodyType2D.Static;
+                _pieces[i].SetRigidbodyMode(RigidbodyType2D.Static);
                 //todo add shiny effect here;
             }
 
@@ -152,7 +164,7 @@ namespace Game
             var piecePosition = CurrentPiece.Rigidbody2D.position;
 
             // Calculate new position based on integer increments
-            int xMovement = Mathf.RoundToInt(_movementInput.x);
+            float xMovement = Mathf.RoundToInt(_movementInput.x);
             float yMovement = piecePosition.y + _movementInput.y * 5f * Time.deltaTime;
             Vector2 newPosition = new Vector2(piecePosition.x + xMovement,
                 yMovement);
