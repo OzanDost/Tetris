@@ -75,7 +75,7 @@ namespace Game
                     return;
                 }
 
-                if (Mathf.Abs(delta.x) > 10f)
+                if (Mathf.Abs(delta.x) > 3f)
                 {
                     _playerBoardController.MovePieceHorizontally(InputManager.DeltaMousePosition);
                     _inputStartPos = currentInputPos;

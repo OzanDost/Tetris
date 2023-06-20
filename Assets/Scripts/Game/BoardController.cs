@@ -61,7 +61,9 @@ namespace Game
                 //todo add shiny effect here;
             }
 
-            _stageFinishLine.IncreaseHeight(ConfigHelper.Config.defaultStageHeight);
+            var defaultStageHeight = ConfigHelper.Config.defaultStageHeight;
+            _stageFinishLine.IncreaseHeight(defaultStageHeight);
+            _pieceSpawnPoint.position = _stageFinishLine.transform.position + Vector3.up * defaultStageHeight;
         }
 
         private void OnPieceFellOffBoard(Collider2D pieceCollider)
