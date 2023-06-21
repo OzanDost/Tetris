@@ -15,8 +15,9 @@ MonoBehaviour:
   pieceWeightsDictionary:
     m_keys: 00000000010000000200000003000000040000000500000006000000
     m_values: 01000000010000000100000001000000010000000100000001000000
-  horizontalMoveSpeed: 0
-  verticalMoveSpeed: 0
-  verticalFastMoveSpeed: 0
+  horizontalMoveSpeed: 5
+  verticalMoveSpeed: 1
+  verticalFastMoveSpeed: 1.5
+  _allowedMistakeCount: 5
   _stageHeights: 
   _defaultStageHeight: 10

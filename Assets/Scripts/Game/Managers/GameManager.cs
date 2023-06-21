@@ -21,6 +21,8 @@ namespace Game.Managers
             Signals.Get<FakeLoadingFinished>().AddListener(OnFakeLoadingFinished);
             Signals.Get<SoloModeButtonClicked>().AddListener(OnSoloModeButtonClicked);
             Signals.Get<MultiplayerModeButtonClicked>().AddListener(OnMultiplayerModeButtonClicked);
+            Signals.Get<LevelFinished>().AddListener(OnLevelFinished);
+            Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
 
             //todo change here
             Signals.Get<PlayButtonClicked>().AddListener(OnPlayButtonClicked);
@@ -73,14 +75,9 @@ namespace Game.Managers
             ChangeGameState(GameState.Menu);
         }
 
-        private void OnLevelFailed()
+        private void OnLevelFinished()
         {
             ChangeGameState(GameState.Fail);
-        }
-
-        private void OnLevelRetryRequested()
-        {
-            ChangeGameState(GameState.Gameplay);
         }
 
 

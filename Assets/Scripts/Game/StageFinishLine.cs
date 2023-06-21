@@ -9,7 +9,6 @@ namespace Game
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            gameObject.SetActive(false);
             PieceReachedStageTarget?.Invoke(other);
         }
 
@@ -27,6 +26,7 @@ namespace Game
             position = new Vector3(position.x, position.y + additionalHeight, position.z);
             transform.position = position;
             gameObject.SetActive(true);
+            Debug.Log("Activated finish line");
         }
     }
 }

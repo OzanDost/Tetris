@@ -14,104 +14,149 @@ namespace Game
         private int _currentPieceIndex;
         private int _currentStageIndex;
         private bool _isActive;
-
-        public Piece CurrentPiece => _pieces[_currentPieceIndex];
+        private bool _isPaused;
         private Piece _lastPieceTouchedFinishLine;
+        private Piece _lastFallenPiece;
         private Vector2 _movementInput;
+        private int _mistakeCount;
+        private GameConfig _gameConfig;
+
+        private Piece CurrentPiece { get; set; }
 
         [SerializeField] private Transform _pieceSpawnPoint;
         [SerializeField] private StageFinishLine _stageFinishLine;
         [SerializeField] private FallZone _fallZone;
-        [SerializeField] private Transform _ground;
+        [SerializeField] private Ground _ground;
 
 
-        private void Awake()
+        public void Initialize()
         {
-            Initialize();
-        }
+            SubscribeToEvents();
 
-        private void Initialize()
-        {
-            _stageFinishLine.PieceReachedStageTarget += OnPieceReachedStageTarget;
-            _fallZone.PieceFellOffBoard += OnPieceFellOffBoard;
-            
             _pieces = new List<Piece>(250);
             _currentPieceIndex = 0;
+            _gameConfig = ConfigHelper.Config;
 
             GeneratePieces();
             ArrangeBoard();
+            ActivatePiece();
 
             _isActive = true;
+        }
 
-            ActivatePiece();
+        private void SubscribeToEvents()
+        {
+            _stageFinishLine.PieceReachedStageTarget += OnPieceReachedStageTarget;
+            _fallZone.PieceFellOffBoard += OnPieceFellOffBoard;
+
+            Signals.Get<PauseRequested>().AddListener(TogglePause);
+            Signals.Get<PauseCanceled>().AddListener(TogglePause);
+            Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
+        }
+
+        private void OnLevelQuit()
+        {
+            _isActive = false;
+            ResetBoard();
+        }
+
+        private void TogglePause()
+        {
+            _isPaused = !_isPaused;
+
+            Time.timeScale = _isPaused ? 0 : 1;
         }
 
         private void ArrangeBoard()
         {
-            _ground.localPosition = Vector3.zero;
+            _ground.transform.localPosition = Vector3.zero;
             _fallZone.transform.localPosition = new Vector3(0, -5f, 0);
-            _stageFinishLine.SetLocalHeight(ConfigHelper.Config.defaultStageHeight); //todo
+            _stageFinishLine.SetLocalHeight(ConfigHelper.Config.DefaultStageHeight); //todo
             _pieceSpawnPoint.localPosition = _stageFinishLine.transform.localPosition + Vector3.up * 5f;
 
-            Signals.Get<BoardArranged>().Dispatch(_ground, _pieceSpawnPoint);
+            Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds, _pieceSpawnPoint);
         }
 
         private void OnPieceReachedStageTarget(Collider2D pieceCollider)
         {
-            if (BoardContainsCollider(pieceCollider, out Piece piece))
-            {
-                if (piece.State != PieceState.Placed) return;
-                if (piece == _lastPieceTouchedFinishLine) return;
-                _currentStageIndex++;
-                _lastPieceTouchedFinishLine = piece;
-                Debug.Log("Stage changed");
-            }
+            var reachedPiece = GetPieceFromCollider(pieceCollider);
+            if (reachedPiece.State != PieceState.Placed) return;
+            if (reachedPiece == _lastPieceTouchedFinishLine) return;
 
-            for (int i = 0; i < _currentPieceIndex; i++)
+            _currentStageIndex++;
+            _lastPieceTouchedFinishLine = reachedPiece;
+
+            //do this inside an coroutine
+            for (int i = 0; i < _currentPieceIndex - 1; i++)
             {
+                if (_pieces[i].State != PieceState.Placed) continue;
                 _pieces[i].SetRigidbodyMode(RigidbodyType2D.Static);
                 //todo add shiny effect here;
             }
 
-            var defaultStageHeight = ConfigHelper.Config.defaultStageHeight;
+            var defaultStageHeight = ConfigHelper.Config.DefaultStageHeight;
             _stageFinishLine.IncreaseHeight(defaultStageHeight);
             _pieceSpawnPoint.position = _stageFinishLine.transform.position + Vector3.up * defaultStageHeight;
         }
 
         private void OnPieceFellOffBoard(Collider2D pieceCollider)
         {
-            if (BoardContainsCollider(pieceCollider, out Piece piece))
-            {
-                //todo add mistake
-            }
+            var fallenPiece = GetPieceFromCollider(pieceCollider);
+            if (fallenPiece.State == PieceState.Inactive) return;
+            if (fallenPiece == _lastFallenPiece) return;
+            _lastFallenPiece = fallenPiece;
+
+            _mistakeCount++;
+
+            Signals.Get<LifeLost>().Dispatch();
+            CheckMistakes(fallenPiece.State == PieceState.Placed);
+            PoolManager.Instance.ReturnPiece(fallenPiece);
+
+            Debug.Log($"Piece{fallenPiece.name} Fell off board. Mistake Count: {_mistakeCount}");
         }
 
-        private bool BoardContainsCollider(Collider2D pieceCollider, out Piece parentPiece)
+        private Piece GetPieceFromCollider(Collider2D pieceCollider)
         {
+            Piece piece = null;
             for (int i = 0; i < _currentPieceIndex; i++)
             {
-                var piece = _pieces[i];
-                if (piece.Colliders.Contains(pieceCollider))
+                if (_pieces[i].Colliders.Contains(pieceCollider))
                 {
-                    parentPiece = piece;
-                    return true;
+                    piece = _pieces[i];
                 }
             }
 
-            parentPiece = null;
-            return false;
+            return piece;
+        }
+
+        private void CheckMistakes(bool isPlacedPiece)
+        {
+            if (_mistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
+            {
+                Signals.Get<LevelFinished>().Dispatch();
+                return;
+            }
+
+            if (!isPlacedPiece)
+            {
+                ActivatePiece();
+            }
         }
 
         private void ActivatePiece()
         {
+            CurrentPiece = _pieces[_currentPieceIndex];
             CurrentPiece.transform.position = _pieceSpawnPoint.position;
             CurrentPiece.Activate();
             CurrentPiece.OnPieceStateChanged += OnPieceStateChanged;
+            _currentPieceIndex++;
+            Signals.Get<CurrentPieceChanged>().Dispatch();
         }
 
         private void OnPieceStateChanged(PieceState oldState, PieceState newState)
         {
             CurrentPiece.OnPieceStateChanged -= OnPieceStateChanged;
+
             if (oldState == PieceState.Active && newState == PieceState.Placed)
             {
                 OnPiecePlaced();
@@ -125,8 +170,7 @@ namespace Game
                 GeneratePieces(50);
             }
 
-            _currentPieceIndex++;
-
+            Debug.Log("Piece Placed");
             ActivatePiece();
         }
 
@@ -137,35 +181,36 @@ namespace Game
             //todo make a different thing for saving
             foreach (var piece in _pieces)
             {
+                CurrentPiece.OnPieceStateChanged -= OnPieceStateChanged;
                 PoolManager.Instance.ReturnPiece(piece);
             }
         }
 
         public void MovePieceHorizontally(Vector2 direction)
         {
-            if (!_isActive) return;
+            if (!_isActive || _isPaused) return;
             _movementInput.x = direction.normalized.x;
         }
 
         public void RotatePiece()
         {
-            if (!_isActive) return;
+            if (!_isActive || _isPaused) return;
             CurrentPiece.Rotate();
         }
 
         public void ToggleVerticalSpeed(bool isSpeedy)
         {
-            _movementInput.y = isSpeedy ? -1.5f : -0.5f;
+            _movementInput.y = isSpeedy ? -_gameConfig.VerticalFastMoveSpeed : -_gameConfig.VerticalMoveSpeed;
         }
 
         private void FixedUpdate()
         {
-            if (!_isActive) return;
+            if (!_isActive || _isPaused) return;
             var piecePosition = CurrentPiece.Rigidbody2D.position;
 
             // Calculate new position based on integer increments
             float xMovement = Mathf.RoundToInt(_movementInput.x);
-            float yMovement = piecePosition.y + _movementInput.y * 5f * Time.deltaTime;
+            float yMovement = piecePosition.y + _movementInput.y * _gameConfig.HorizontalMoveSpeed * Time.deltaTime;
             Vector2 newPosition = new Vector2(piecePosition.x + xMovement,
                 yMovement);
 

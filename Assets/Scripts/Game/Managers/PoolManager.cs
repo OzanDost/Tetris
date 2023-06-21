@@ -63,6 +63,7 @@ namespace Game.Managers
 
         public void ReturnPiece(Piece piece)
         {
+            if(piece.IsInPool) return;
             piece.IsInPool = true;
             piece.OnReturnToPool();
         }

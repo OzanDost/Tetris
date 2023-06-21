@@ -29,7 +29,8 @@ namespace Game
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (_state == PieceState.Placed) return;
+            if (_state is not PieceState.Active) return;
+            _rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
             _rigidbody2D.velocity = Vector2.zero;
             _rigidbody2D.angularVelocity = 0f;
             _rigidbody2D.gravityScale = 1f;
@@ -50,14 +51,17 @@ namespace Game
             }
         }
 
-        [Button]
-        public void Test()
-        {
-            ToggleLayer(true);
-        }
-
         public void OnSpawn()
         {
+        }
+
+        public void OnReturnToPool()
+        {
+            ChangeState(PieceState.Inactive);
+            gameObject.SetActive(false);
+            _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            ToggleColliderTriggers(true);
+            ToggleLayer(false);
         }
 
         public void Activate()
@@ -78,14 +82,6 @@ namespace Game
             }
         }
 
-        public void OnReturnToPool()
-        {
-            ToggleColliderTriggers(true);
-            ChangeState(PieceState.Inactive);
-            gameObject.SetActive(false);
-            ToggleLayer(false);
-        }
-
         public void Move(Vector2 direction, float speed)
         {
             if (_state != PieceState.Active) return;
@@ -96,7 +92,8 @@ namespace Game
         {
             if (_state != PieceState.Active) return;
 
-            transform.Rotate(0, 0, 90);
+            _rigidbody2D.MoveRotation(_rigidbody2D.rotation + 90);
+            
         }
 
         private void ToggleColliderTriggers(bool value)

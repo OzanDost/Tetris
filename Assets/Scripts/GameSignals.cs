@@ -9,9 +9,14 @@ public class GameStateChanged : ASignal<GameState, GameState>{}
 public class RequestGameStateChange : ASignal<GameState>{}
 public class GameplayStarted : ASignal<GameMode>{}
 
-public class BoardArranged : ASignal<Transform, Transform>{}
+public class BoardArranged : ASignal<Transform[], Transform>{}
 
 public class LifeLost : ASignal{}
+public class LevelFinished : ASignal{}
+public class LevelQuit : ASignal{}
+public class PauseRequested : ASignal{}
+public class PauseCanceled : ASignal{}
+
 
 //UI Signals
 
@@ -27,3 +32,7 @@ public class MultiplayerModeButtonClicked : ASignal{}
 
 public class OnLightningButtonClicked : ASignal{}
 public class OnFreezeButtonClicked : ASignal{}
+
+//Board Signals
+
+public class CurrentPieceChanged : ASignal{}

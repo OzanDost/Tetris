@@ -7,23 +7,28 @@ namespace UI.Popups
 {
     public class PausePopup : AWindowController
     {
-        [SerializeField] private Button resumeButton;
-        [SerializeField] private Button backgroundTapButton;
+        [SerializeField] private Button _resumeButton;
+        [SerializeField] private Button _backgroundTapButton;
+        [SerializeField] private Button _quitButton;
+
         protected override void Awake()
         {
             base.Awake();
-            resumeButton.onClick.AddListener(OnResumeButtonClicked);
-            backgroundTapButton.onClick.AddListener(OnResumeButtonClicked);
+            _resumeButton.onClick.AddListener(OnResumeButtonClicked);
+            _backgroundTapButton.onClick.AddListener(OnResumeButtonClicked);
+            _quitButton.onClick.AddListener(OnQuitButtonClicked);
+        }
+
+        private void OnQuitButtonClicked()
+        {
+            Signals.Get<LevelQuit>().Dispatch();
+            Signals.Get<PauseCanceled>().Dispatch();
         }
 
         private void OnResumeButtonClicked()
         {
             CloseRequest?.Invoke(this);
-        }
-
-        protected override void On_UIClose()
-        {
-            base.On_UIClose();
+            Signals.Get<PauseCanceled>().Dispatch();
         }
     }
 }

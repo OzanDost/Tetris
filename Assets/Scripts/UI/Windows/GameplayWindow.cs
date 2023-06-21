@@ -15,6 +15,8 @@ namespace UI.Windows
         [SerializeField] private TextMeshProUGUI _manaText;
         [SerializeField] private TextMeshProUGUI _scoreText;
 
+        private int _currentLiveIndex;
+
         protected override void Awake()
         {
             base.Awake();
@@ -25,9 +27,24 @@ namespace UI.Windows
             Signals.Get<LifeLost>().AddListener(OnLifeLost);
         }
 
+        protected override void On_UIOPen()
+        {
+            base.On_UIOPen();
+            _currentLiveIndex = 0;
+            //todo get this from save data
+        }
+
         private void OnLifeLost()
         {
             //todo close one of the hearts and show a cross mark at the bottom of the screen
+            _currentLiveIndex++;
+            if (_currentLiveIndex >= _lives.Length)
+                return;
+
+            for (int i = 0; i < _currentLiveIndex; i++)
+            {
+                _lives[i].gameObject.SetActive(false);
+            }
         }
 
         private void OnLightningButtonClicked()
@@ -41,6 +58,7 @@ namespace UI.Windows
 
         private void OnPauseButtonClicked()
         {
+            Signals.Get<PauseRequested>().Dispatch();
         }
     }
 }

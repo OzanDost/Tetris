@@ -24,10 +24,12 @@ namespace Data
 
         #region Gameplay Configs
 
+        public int AllowedMistakeCount => _allowedMistakeCount;
+        [SerializeField] private int _allowedMistakeCount;
         public int[] StageHeights => _stageHeights;
         [SerializeField] private int[] _stageHeights;
 
-        public int defaultStageHeight => _defaultStageHeight;
+        public int DefaultStageHeight => _defaultStageHeight;
         [SerializeField] private int _defaultStageHeight;
 
         #endregion

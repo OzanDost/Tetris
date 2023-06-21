@@ -8,6 +8,7 @@ namespace Game
     public class GameplayController : MonoBehaviour
     {
         private bool _canGiveInput;
+        private bool _isTakingInput;
         private GameMode _gameMode;
 
         private BoardController _playerBoardController;
@@ -21,6 +22,13 @@ namespace Game
         private void Awake()
         {
             Signals.Get<GameplayStarted>().AddListener(OnGameplayStarted);
+            Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
+            Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
+        }
+
+        private void OnLevelQuit()
+        {
+            _canGiveInput = false;
         }
 
         private void OnGameplayStarted(GameMode mode)
@@ -49,18 +57,40 @@ namespace Game
             {
                 _playerBoardController.ResetBoard();
             }
+
+            _playerBoardController.Initialize();
+
+            // if (mode == GameMode.Versus)
+            // {
+            // if (_opponentBoardController == null)
+            // {
+            //     var targetPos = new Vector3(20f, 0, 0);
+            //     _opponentBoardController = Instantiate(_boardControllerPrefab, targetPos, Quaternion.identity);
+            // }
+            // else
+            // {
+            //     _opponentBoardController.ResetBoard();
+            // }
+            // }
+        }
+
+        private void OnCurrentPieceChanged()
+        {
+            _isTakingInput = false;
         }
 
         private void Update()
         {
             if (!_canGiveInput) return;
 
-
             if (InputManager.GetMouseButtonDown())
             {
                 _inputStartPos = InputManager.GetMousePosition();
                 _pieceMoved = false;
+                _isTakingInput = true;
             }
+
+            if (!_isTakingInput) return;
 
             if (InputManager.GetMouseButton())
             {
