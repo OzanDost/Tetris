@@ -1,4 +1,5 @@
 using Enums;
+using Game;
 using ThirdParty;
 using UnityEngine;
 
@@ -35,4 +36,4 @@ public class OnFreezeButtonClicked : ASignal{}
 
 //Board Signals
 
-public class CurrentPieceChanged : ASignal{}
+public class CurrentPieceChanged : ASignal<Piece>{}

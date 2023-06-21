@@ -27,12 +27,12 @@ namespace Game.Managers
             _currentPiece.transform.position = Vector3.up * 30f;
             _currentPiece.gameObject.SetActive(true);
 
-            _currentPiece.OnPieceStateChanged += OnPieceStateChanged;
+            _currentPiece.PieceStateChanged += PieceStateChanged;
         }
 
-        private void OnPieceStateChanged(PieceState oldState, PieceState newState)
+        private void PieceStateChanged(PieceState oldState, PieceState newState)
         {
-            _currentPiece.OnPieceStateChanged -= OnPieceStateChanged;
+            _currentPiece.PieceStateChanged -= PieceStateChanged;
             if (newState == PieceState.Placed)
                 GetRandomPiece();
         }
@@ -42,7 +42,7 @@ namespace Game.Managers
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                _currentPiece.Move(Vector2.left, 5f);
+                _currentPiece.Move(Vector2.left);
                 _inputVector.x = -1f;
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -63,7 +63,7 @@ namespace Game.Managers
         {
             if (_currentPiece != null)
             {
-                _currentPiece.Move(_inputVector, 5f);
+                _currentPiece.Move(_inputVector);
                 if (_inputVector.x != 0) _inputVector.x = 0f;
                 if (_inputVector.y != -0.1f) _inputVector.y = -0.1f;
             }

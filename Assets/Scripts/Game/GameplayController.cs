@@ -74,7 +74,7 @@ namespace Game
             // }
         }
 
-        private void OnCurrentPieceChanged()
+        private void OnCurrentPieceChanged(Piece newPiece)
         {
             _isTakingInput = false;
         }
@@ -104,7 +104,7 @@ namespace Game
                     return;
                 }
 
-                if (Mathf.Abs(delta.x) > 20f)
+                if (Mathf.Abs(delta.x) > 10f)
                 {
                     _playerBoardController.MovePieceHorizontally(InputManager.DeltaMousePosition);
                     _inputStartPos = currentInputPos;

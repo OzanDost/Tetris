@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
@@ -148,14 +149,14 @@ namespace Game
             CurrentPiece = _pieces[_currentPieceIndex];
             CurrentPiece.transform.position = _pieceSpawnPoint.position;
             CurrentPiece.Activate();
-            CurrentPiece.OnPieceStateChanged += OnPieceStateChanged;
+            CurrentPiece.PieceStateChanged += PieceStateChanged;
             _currentPieceIndex++;
-            Signals.Get<CurrentPieceChanged>().Dispatch();
+            Signals.Get<CurrentPieceChanged>().Dispatch(CurrentPiece);
         }
 
-        private void OnPieceStateChanged(PieceState oldState, PieceState newState)
+        private void PieceStateChanged(PieceState oldState, PieceState newState)
         {
-            CurrentPiece.OnPieceStateChanged -= OnPieceStateChanged;
+            CurrentPiece.PieceStateChanged -= PieceStateChanged;
 
             if (oldState == PieceState.Active && newState == PieceState.Placed)
             {
@@ -181,7 +182,7 @@ namespace Game
             //todo make a different thing for saving
             foreach (var piece in _pieces)
             {
-                CurrentPiece.OnPieceStateChanged -= OnPieceStateChanged;
+                CurrentPiece.PieceStateChanged -= PieceStateChanged;
                 PoolManager.Instance.ReturnPiece(piece);
             }
         }
@@ -189,7 +190,7 @@ namespace Game
         public void MovePieceHorizontally(Vector2 direction)
         {
             if (!_isActive || _isPaused) return;
-            _movementInput.x = direction.normalized.x;
+            _movementInput.x = direction.normalized.x / 2f;
         }
 
         public void RotatePiece()
@@ -209,14 +210,14 @@ namespace Game
             var piecePosition = CurrentPiece.Rigidbody2D.position;
 
             // Calculate new position based on integer increments
-            float xMovement = Mathf.RoundToInt(_movementInput.x);
+            float xMovement = piecePosition.x + _movementInput.x;
+            // (float)Math.Round((piecePosition.x + _movementInput.x) * 2f, MidpointRounding.AwayFromZero) / 2f;
             float yMovement = piecePosition.y + _movementInput.y * _gameConfig.HorizontalMoveSpeed * Time.deltaTime;
-            Vector2 newPosition = new Vector2(piecePosition.x + xMovement,
-                yMovement);
+            Vector2 newPosition = new Vector2(xMovement, yMovement);
 
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
-            _movementInput.x = 0f;
-            _movementInput.y = -0.1f;
+            _movementInput.x = 0;
+            _movementInput.y = -_gameConfig.VerticalMoveSpeed;
         }
 
 

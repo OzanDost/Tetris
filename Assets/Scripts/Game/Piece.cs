@@ -1,7 +1,6 @@
 using System;
 using DefaultNamespace;
 using Enums;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game
@@ -23,8 +22,7 @@ namespace Game
 
         private PieceState _state;
 
-        public event Action<PieceState, PieceState> OnPieceStateChanged;
-
+        public event Action<PieceState, PieceState> PieceStateChanged;
         public bool IsInPool { get; set; }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -43,7 +41,7 @@ namespace Game
         {
             var oldState = _state;
             _state = newState;
-            OnPieceStateChanged?.Invoke(oldState, newState);
+            PieceStateChanged?.Invoke(oldState, newState);
 
             if (newState == PieceState.Placed)
             {
@@ -82,7 +80,7 @@ namespace Game
             }
         }
 
-        public void Move(Vector2 direction, float speed)
+        public void Move(Vector2 direction)
         {
             if (_state != PieceState.Active) return;
             _rigidbody2D.MovePosition(_rigidbody2D.position + direction);
@@ -91,9 +89,7 @@ namespace Game
         public void Rotate()
         {
             if (_state != PieceState.Active) return;
-
             _rigidbody2D.MoveRotation(_rigidbody2D.rotation + 90);
-            
         }
 
         private void ToggleColliderTriggers(bool value)
