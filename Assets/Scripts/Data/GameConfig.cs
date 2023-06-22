@@ -26,11 +26,9 @@ namespace Data
 
         public int AllowedMistakeCount => _allowedMistakeCount;
         [SerializeField] private int _allowedMistakeCount;
-        public int[] StageHeights => _stageHeights;
-        [SerializeField] private int[] _stageHeights;
-
-        public int DefaultStageHeight => _defaultStageHeight;
-        [SerializeField] private int _defaultStageHeight;
+        
+        public int TargetHeight => _targetHeight;
+        [SerializeField] private int _targetHeight;
 
         #endregion
     }

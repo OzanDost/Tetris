@@ -75,6 +75,7 @@ namespace Game.Managers
 
         private void OnReturnToMenuRequested()
         {
+            
         }
 
         private void OnLevelQuit()
@@ -82,9 +83,16 @@ namespace Game.Managers
             ChangeGameState(GameState.Menu);
         }
 
-        private void OnLevelFinished()
+        private void OnLevelFinished(bool isSuccess)
         {
-            ChangeGameState(GameState.Fail);
+            if (isSuccess)
+            {
+                ChangeGameState(GameState.Success);
+            }
+            else
+            {
+                ChangeGameState(GameState.Fail);
+            }
         }
 
 

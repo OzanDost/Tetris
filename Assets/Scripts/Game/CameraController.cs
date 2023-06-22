@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cinemachine;
 using Enums;
 using ThirdParty;
@@ -8,72 +9,77 @@ namespace Game
     public class CameraController : MonoBehaviour
     {
         [SerializeField] private CinemachineVirtualCamera _virtualCamera;
-        [SerializeField] private CinemachineTargetGroup _targetGroup;
-        [SerializeField] private CinemachineConfiner2D _confiner;
-        [SerializeField] private LayerMask _viewBoxLayerMask;
+        [SerializeField] private Transform _cameraLookAtTarget;
 
-        private PolygonCollider2D _viewBoxCollider;
         private Bounds _bounds;
+        private List<Transform> _targets;
 
         private void Awake()
         {
             Signals.Get<BoardArranged>().AddListener(OnBoardArranged);
             Signals.Get<GameStateChanged>().AddListener(OnGameStateChanged);
+            Signals.Get<AIMistakesFilled>().AddListener(OnAiMistakesFilled);
+
+            _targets = new List<Transform>(4);
+        }
+
+        private void OnAiMistakesFilled()
+        {
+            //remove last 3 elements
+            _targets.RemoveRange(_targets.Count - 3, 3);
+            CreateViewBox();
         }
 
         private void OnGameStateChanged(GameState oldState, GameState newState)
         {
-            if (newState is GameState.Fail or GameState.Success)
+            if (newState is not GameState.Gameplay)
             {
-                _targetGroup.m_Targets = new CinemachineTargetGroup.Target[] { };
                 _bounds = new Bounds();
+                _targets.Clear();
             }
         }
 
         private void OnBoardArranged(Transform[] groundBounds, Transform pieceSpawner)
         {
-            CreateViewBox(groundBounds, pieceSpawner);
-            foreach (var groundBound in groundBounds)
-            {
-                _targetGroup.AddMember(groundBound, 1f, 1f);
-            }
+            _targets.AddRange(groundBounds);
+            _targets.Add(pieceSpawner);
 
-            _targetGroup.AddMember(pieceSpawner, 1f, 1f);
-
-            _targetGroup.m_PositionMode = CinemachineTargetGroup.PositionMode.GroupAverage;
+            CreateViewBox();
         }
 
-        private void CreateViewBox(Transform[] groundBounds, Transform pieceSpawner)
+        private void CreateViewBox()
         {
-            _bounds.Encapsulate(pieceSpawner.position);
-
-            foreach (Transform ground in groundBounds)
+            foreach (Transform target in _targets)
             {
-                _bounds.Encapsulate(ground.position);
+                _bounds.Encapsulate(target.position);
             }
 
-            if (_viewBoxCollider == null)
+            SetOrthographicSizeToFitBounds(_bounds, 0.75f);
+            _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y  / 3f, _bounds.center.z);
+        }
+
+        private void SetOrthographicSizeToFitBounds(Bounds targetBounds, float paddingFactor)
+        {
+            float cameraAspect = _virtualCamera.m_Lens.Aspect;
+            float boundsAspect = targetBounds.size.x / targetBounds.size.y;
+
+            float orthographicSize;
+
+            // If camera aspect is greater than the bounds aspect, calculate size based on width
+            if (cameraAspect > boundsAspect)
             {
-                GameObject viewBox = new GameObject("ViewBox");
-                _viewBoxCollider = viewBox.AddComponent<PolygonCollider2D>();
+                orthographicSize = targetBounds.extents.x / cameraAspect;
+            }
+            else
+            {
+                // Otherwise, calculate size based on height
+                orthographicSize = targetBounds.extents.y;
             }
 
-            // _viewBoxCollider.transform.SetParent(transform);
-            _viewBoxCollider.isTrigger = true;
-            _viewBoxCollider.gameObject.layer = Utils.LayerMaskToLayer(_viewBoxLayerMask);
-            Vector2[] viewBoxPoints =
-            {
-                new Vector2(_bounds.min.x, _bounds.min.y),
-                new Vector2(_bounds.min.x, _bounds.max.y),
-                new Vector2(_bounds.max.x, _bounds.max.y),
-                new Vector2(_bounds.max.x, _bounds.min.y)
-            };
+            // Add padding
+            orthographicSize += orthographicSize * paddingFactor;
 
-            _viewBoxCollider.points = viewBoxPoints;
-
-            _confiner.m_BoundingShape2D = _viewBoxCollider;
-
-            _virtualCamera.m_Lens.OrthographicSize = Mathf.Abs(_bounds.size.x);
+            _virtualCamera.m_Lens.OrthographicSize = orthographicSize;
         }
     }
 }

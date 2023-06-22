@@ -19,5 +19,4 @@ MonoBehaviour:
   verticalMoveSpeed: 0.5
   verticalFastMoveSpeed: 1.5
   _allowedMistakeCount: 5
-  _stageHeights: 
-  _defaultStageHeight: 10
+  _targetHeight: 40

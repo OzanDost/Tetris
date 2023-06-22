@@ -18,7 +18,6 @@ namespace Game
         protected List<Piece> Pieces;
         protected Piece LastFallenPiece;
 
-        private int _currentStageIndex;
         private Piece _lastPieceTouchedFinishLine;
         private Vector2 _movementInput;
         private GameConfig _gameConfig;
@@ -29,7 +28,7 @@ namespace Game
         [SerializeField] protected Transform PieceSpawnPoint;
         [SerializeField] protected StageFinishLine StageFinishLine;
         [SerializeField] protected FallZone FallZone;
-        
+
         [SerializeField] private Ground _ground;
 
 
@@ -42,9 +41,10 @@ namespace Game
             _gameConfig = ConfigHelper.Config;
 
             GeneratePieces();
-            ArrangeBoard();
+            ArrangeBoard(true);
             ActivatePiece();
 
+            if (IsPaused) TogglePause();
             IsActive = true;
         }
 
@@ -95,14 +95,17 @@ namespace Game
             Time.timeScale = IsPaused ? 0 : 1;
         }
 
-        private void ArrangeBoard()
+        private void ArrangeBoard(bool shouldSendEvent)
         {
             _ground.transform.localPosition = Vector3.zero;
             FallZone.transform.localPosition = new Vector3(0, -5f, 0);
-            StageFinishLine.SetLocalHeight(ConfigHelper.Config.DefaultStageHeight); //todo
+            StageFinishLine.SetLocalHeight(ConfigHelper.Config.TargetHeight);
             PieceSpawnPoint.localPosition = StageFinishLine.transform.localPosition + Vector3.up * 5f;
 
-            Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds, PieceSpawnPoint);
+            if (shouldSendEvent)
+            {
+                Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds, PieceSpawnPoint);
+            }
         }
 
         protected void OnPieceReachedStageTarget(Collider2D pieceCollider)
@@ -112,14 +115,9 @@ namespace Game
             if (reachedPiece.State != PieceState.Placed) return;
             if (reachedPiece == _lastPieceTouchedFinishLine) return;
 
-            _currentStageIndex++;
             _lastPieceTouchedFinishLine = reachedPiece;
 
             FreezePlacedPieces();
-
-            var defaultStageHeight = ConfigHelper.Config.DefaultStageHeight;
-            StageFinishLine.IncreaseHeight(defaultStageHeight);
-            PieceSpawnPoint.position = StageFinishLine.transform.position + Vector3.up * defaultStageHeight;
         }
 
         protected virtual void OnPieceFellOffBoard(Collider2D pieceCollider)
@@ -158,7 +156,7 @@ namespace Game
         {
             if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
             {
-                Signals.Get<LivesFinished>().Dispatch();
+                Signals.Get<LevelFinished>().Dispatch(false);
                 return;
             }
 
@@ -223,7 +221,7 @@ namespace Game
                 PoolManager.Instance.ReturnPiece(piece);
             }
 
-            ArrangeBoard();
+            ArrangeBoard(false);
         }
 
         protected void MovePieceHorizontally(float direction)
@@ -246,6 +244,7 @@ namespace Game
         private void FixedUpdate()
         {
             if (!IsActive || IsPaused) return;
+            if (CurrentPiece == null) return;
             var piecePosition = CurrentPiece.Rigidbody2D.position;
 
             // Calculate new position based on integer increments

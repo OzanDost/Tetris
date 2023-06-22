@@ -60,6 +60,7 @@ namespace Game
             _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
             ToggleColliderTriggers(true);
             ToggleLayer(false);
+            transform.localEulerAngles = Vector3.zero;
         }
 
         public void Activate()

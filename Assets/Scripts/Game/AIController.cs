@@ -8,8 +8,9 @@ namespace Game
     public class AIController : BoardController
     {
         private float _lastActionTime;
-        [SerializeField] private float _actionInterval = 1f;
         private Vector2 _randomDirection;
+
+        [SerializeField] private float _actionInterval = 1f;
 
         protected override void SubscribeToEvents()
         {
@@ -70,6 +71,9 @@ namespace Game
             if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
             {
                 Signals.Get<AIMistakesFilled>().Dispatch();
+                UnsubscribeFromEvents();
+                IsActive = false;
+                return;
             }
 
             if (!isPlacedPiece)
@@ -80,6 +84,8 @@ namespace Game
 
         protected override void ActivatePiece()
         {
+            // if (!IsActive || IsPaused) return;
+            
             CurrentPiece = Pieces[CurrentPieceIndex];
             CurrentPiece.transform.position = PieceSpawnPoint.position;
             CurrentPiece.Activate();

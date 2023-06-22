@@ -102,7 +102,7 @@ namespace Game
             _canGiveInput = false;
         }
 
-        private void OnLevelFinished()
+        private void OnLevelFinished(bool isSuccess)
         {
             _canGiveInput = false;
         }

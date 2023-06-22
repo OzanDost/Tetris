@@ -14,7 +14,8 @@ public class BoardArranged : ASignal<Transform[], Transform>{}
 
 public class LifeLost : ASignal{}
 public class LivesFinished : ASignal{}
-public class LevelFinished : ASignal{}
+
+public class LevelFinished : ASignal<bool>{}
 public class LevelQuit : ASignal{}
 public class PauseRequested : ASignal{}
 public class PauseCanceled : ASignal{}

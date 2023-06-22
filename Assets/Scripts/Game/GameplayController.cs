@@ -6,8 +6,6 @@ namespace Game
 {
     public class GameplayController : MonoBehaviour
     {
-        private GameMode _gameMode;
-
         private BoardController _playerBoardController;
         private AIController _opponentBoardController;
 
@@ -27,9 +25,6 @@ namespace Game
 
         private void Initialize(GameMode gameMode)
         {
-            _gameMode = gameMode;
-
-            //todo add cases for versus mode
             CreateBoardControllers(gameMode);
         }
 
@@ -60,6 +55,13 @@ namespace Game
                 }
 
                 _opponentBoardController.Initialize();
+            }
+            else
+            {
+                if (_opponentBoardController != null)
+                {
+                    Destroy(_opponentBoardController.gameObject);
+                }
             }
         }
     }
