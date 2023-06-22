@@ -37,7 +37,6 @@ namespace UI.Windows
         private void OnLifeLost()
         {
             //todo close one of the hearts and show a cross mark at the bottom of the screen
-            _currentLiveIndex++;
             if (_currentLiveIndex >= _lives.Length)
                 return;
 
@@ -45,6 +44,8 @@ namespace UI.Windows
             {
                 _lives[i].gameObject.SetActive(false);
             }
+
+            _currentLiveIndex++;
         }
 
         private void OnLightningButtonClicked()

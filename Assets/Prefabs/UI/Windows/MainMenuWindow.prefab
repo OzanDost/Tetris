@@ -102,7 +102,7 @@ MonoBehaviour:
     windowQueuePriority: 0
     isPopup: 0
   _playButton: {fileID: 544755254225699244}
-  _continueButton: {fileID: 3447091912752049551}
+  _versusButton: {fileID: 3447091912752049551}
 --- !u!1 &2924285766693847910
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,7 +683,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Continue
+  m_text: VS. CPU
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5c90ef4e82c92483a89dc3c978f95d34, type: 2}
   m_sharedMaterial: {fileID: 842800095526461395, guid: 5c90ef4e82c92483a89dc3c978f95d34, type: 2}
@@ -766,7 +766,7 @@ GameObject:
   - component: {fileID: 3447091912752049551}
   - component: {fileID: 5054516371076414676}
   m_Layer: 5
-  m_Name: ContinueLevelButton
+  m_Name: VersusModeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -8,21 +8,20 @@ namespace UI.Windows
     public class MainMenuWindow : AWindowController
     {
         [SerializeField] private Button _playButton;
-
-        [SerializeField] private Button _continueButton;
+        [SerializeField] private Button _versusButton;
 
         protected override void Awake()
         {
             base.Awake();
             _playButton.onClick.AddListener(OnPlayButtonClicked);
-            _continueButton.onClick.AddListener(OnContinueButtonClicked);
+            _versusButton.onClick.AddListener(OnVersusButtonClicked);
         }
 
-        private void OnContinueButtonClicked()
+        private void OnVersusButtonClicked()
         {
-            Signals.Get<ContinueButtonClicked>().Dispatch();
+            Signals.Get<VersusButtonClicked>().Dispatch();
         }
-        
+
         private void OnPlayButtonClicked()
         {
             Signals.Get<PlayButtonClicked>().Dispatch();

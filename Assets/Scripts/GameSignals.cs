@@ -13,6 +13,7 @@ public class GameplayStarted : ASignal<GameMode>{}
 public class BoardArranged : ASignal<Transform[], Transform>{}
 
 public class LifeLost : ASignal{}
+public class LivesFinished : ASignal{}
 public class LevelFinished : ASignal{}
 public class LevelQuit : ASignal{}
 public class PauseRequested : ASignal{}
@@ -23,6 +24,7 @@ public class PauseCanceled : ASignal{}
 
 public class FakeLoadingFinished : ASignal{}
 public class PlayButtonClicked : ASignal{}
+public class VersusButtonClicked : ASignal{}
 public class ContinueButtonClicked : ASignal{}
 public class SoloPlayButtonClicked : ASignal{}
 public class MultiplayerPlayButtonClicked : ASignal{}
@@ -37,3 +39,16 @@ public class OnFreezeButtonClicked : ASignal{}
 //Board Signals
 
 public class CurrentPieceChanged : ASignal<Piece>{}
+
+
+//Player Input Signals
+
+public class VerticalSpeedToggled : ASignal<bool>{}
+public class HorizontalInputGiven: ASignal<float>{}
+public class RotateInputGiven : ASignal{}
+
+
+// Versus Signals
+
+public class AIMistakesFilled : ASignal{}
+public class AiPieceChanged : ASignal<Piece>{}

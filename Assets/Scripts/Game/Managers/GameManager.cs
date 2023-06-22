@@ -26,6 +26,7 @@ namespace Game.Managers
 
             //todo change here
             Signals.Get<PlayButtonClicked>().AddListener(OnPlayButtonClicked);
+            Signals.Get<VersusButtonClicked>().AddListener(OnVersusButtonClicked);
 
             ChangeGameState(GameState.Loading);
 
@@ -33,6 +34,12 @@ namespace Game.Managers
             ConfigHelper.Initialize();
             ScoreManager.Initialize();
             SaveManager.Initialize();
+        }
+
+        private void OnVersusButtonClicked()
+        {
+            ChangeGameState(GameState.Gameplay);
+            Signals.Get<GameplayStarted>().Dispatch(GameMode.Versus);
         }
 
         private void OnPlayButtonClicked()
