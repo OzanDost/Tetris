@@ -129,9 +129,12 @@ namespace Game
             LastFallenPiece = fallenPiece;
 
             MistakeCount++;
+            fallenPiece.PieceStateChanged -= PieceStateChanged;
 
             Signals.Get<LifeLost>().Dispatch();
+
             CheckMistakes(fallenPiece.State == PieceState.Placed);
+
             PoolManager.Instance.ReturnPiece(fallenPiece);
 
             Debug.Log($"Piece{fallenPiece.name} Fell off board. Mistake Count: {MistakeCount}");
@@ -172,6 +175,7 @@ namespace Game
             CurrentPiece.transform.position = PieceSpawnPoint.position;
             CurrentPiece.Activate();
             CurrentPiece.PieceStateChanged += PieceStateChanged;
+
             CurrentPieceIndex++;
             Signals.Get<CurrentPieceChanged>().Dispatch(CurrentPiece);
         }
@@ -206,6 +210,8 @@ namespace Game
                 GeneratePieces(50);
             }
 
+            Signals.Get<PiecePlaced>().Dispatch(CurrentPiece);
+            
             Debug.Log("Piece Placed");
             ActivatePiece();
         }
@@ -227,7 +233,7 @@ namespace Game
         protected void MovePieceHorizontally(float direction)
         {
             if (!IsActive || IsPaused) return;
-            _movementInput.x = direction > 0 ? 0.5f : -0.5f;
+            _movementInput.x = direction > 0 ? 0.75f : -0.75f;
         }
 
         protected void RotatePiece()

@@ -11,6 +11,8 @@ namespace Game
         public PieceType PieceType => _pieceType;
         public Rigidbody2D Rigidbody2D => _rigidbody2D;
         public Collider2D[] Colliders => _colliders;
+        
+        public SpriteRenderer[] SpriteRenderers => _spriteRenderers;
 
 
         [SerializeField] private Rigidbody2D _rigidbody2D;

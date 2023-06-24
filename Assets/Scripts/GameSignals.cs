@@ -40,6 +40,7 @@ public class OnFreezeButtonClicked : ASignal{}
 //Board Signals
 
 public class CurrentPieceChanged : ASignal<Piece>{}
+public class PiecePlaced : ASignal<Piece>{}
 
 
 //Player Input Signals

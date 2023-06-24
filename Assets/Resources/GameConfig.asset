@@ -17,6 +17,6 @@ MonoBehaviour:
     m_values: 01000000010000000100000001000000010000000100000001000000
   horizontalMoveSpeed: 5
   verticalMoveSpeed: 0.5
-  verticalFastMoveSpeed: 1.5
+  verticalFastMoveSpeed: 2
   _allowedMistakeCount: 5
   _targetHeight: 40

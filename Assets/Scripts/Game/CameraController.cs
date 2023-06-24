@@ -10,17 +10,36 @@ namespace Game
     {
         [SerializeField] private CinemachineVirtualCamera _virtualCamera;
         [SerializeField] private Transform _cameraLookAtTarget;
-
+        [SerializeField] private CinemachineImpulseSource _impulseSource;
         private Bounds _bounds;
         private List<Transform> _targets;
+
+        public Vector3 impulseAmplitude = new Vector3(1.0f, 1.0f, 1.0f);
+        public float shakeDuration = 0.5f;
 
         private void Awake()
         {
             Signals.Get<BoardArranged>().AddListener(OnBoardArranged);
             Signals.Get<GameStateChanged>().AddListener(OnGameStateChanged);
             Signals.Get<AIMistakesFilled>().AddListener(OnAiMistakesFilled);
-
+            Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
             _targets = new List<Transform>(4);
+        }
+
+        private void OnCurrentPieceChanged(Piece piece)
+        {
+            ShakeCamera();
+        }
+
+        private void ShakeCamera()
+        {
+            Vector3 impulse = new Vector3(
+                Random.Range(-impulseAmplitude.x, impulseAmplitude.x),
+                Random.Range(-impulseAmplitude.y, impulseAmplitude.y),
+                Random.Range(-impulseAmplitude.z, impulseAmplitude.z)
+            );
+
+            _impulseSource.GenerateImpulse(0.1f);
         }
 
         private void OnAiMistakesFilled()
@@ -55,7 +74,7 @@ namespace Game
             }
 
             SetOrthographicSizeToFitBounds(_bounds, 0.75f);
-            _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y  / 3f, _bounds.center.z);
+            _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y / 3f, _bounds.center.z);
         }
 
         private void SetOrthographicSizeToFitBounds(Bounds targetBounds, float paddingFactor)
