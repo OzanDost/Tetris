@@ -1,6 +1,8 @@
 using System;
+using System.Text;
 using Coffee.UIExtensions;
 using DG.Tweening;
+using ThirdParty;
 using ThirdParty.uiframework.Window;
 using TMPro;
 using UnityEngine;
@@ -21,12 +23,32 @@ namespace UI.Popups
 
         private Tween _scoreTween;
         private Sequence _starSequence;
+        private float _targetScore;
 
 
         protected override void Awake()
         {
             base.Awake();
+        }
+
+        protected override void AddListeners()
+        {
+            base.AddListeners();
             continueButton.onClick.AddListener(OnContinueButtonClicked);
+
+            Signals.Get<BoardHeightCalculated>().AddListener(OnBoardHeightCalculated);
+        }
+
+        private void OnBoardHeightCalculated(float height)
+        {
+            _targetScore = height;
+        }
+
+        private void AnimateScoreText()
+        {
+            _scoreTween.Kill();
+            _scoreTween = DOTween.To(() => 0, x => scoreText.SetText($"Score: {x:F1}m"), _targetScore, 2f)
+                .SetEase(Ease.InOutExpo);
         }
 
         protected override void On_UIOPen()
@@ -54,6 +76,8 @@ namespace UI.Popups
             _scoreTween = DOTween.To(() => startNumber, x => startNumber = x, Properties.score, 2f)
                 .SetEase(Ease.InOutExpo)
                 .OnUpdate(() => { scoreText.SetText($"Score: {startNumber}"); });
+
+            AnimateScoreText();
         }
 
         protected override void On_UIClose()

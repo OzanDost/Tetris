@@ -1,11 +1,8 @@
-using UnityEngine;
 
 namespace Game
 {
-    public class Ground : MonoBehaviour
+    public class Ground : Zone
     {
-        [SerializeField] private Transform[] _horizontalBounds;
-
-        public Transform[] HorizontalBounds => _horizontalBounds;
+       
     }
 }

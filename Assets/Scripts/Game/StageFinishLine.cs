@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class StageFinishLine : MonoBehaviour
+    public class StageFinishLine : Zone
     {
         public event Action<Collider2D> PieceReachedStageTarget;
 

@@ -10,7 +10,7 @@ public class GameStateChanged : ASignal<GameState, GameState>{}
 public class RequestGameStateChange : ASignal<GameState>{}
 public class GameplayStarted : ASignal<GameMode>{}
 
-public class BoardArranged : ASignal<Transform[], Transform>{}
+public class BoardArranged : ASignal<Transform[], Transform[], Transform>{}
 
 public class LifeLost : ASignal{}
 public class LivesFinished : ASignal{}
@@ -41,6 +41,8 @@ public class OnFreezeButtonClicked : ASignal{}
 
 public class CurrentPieceChanged : ASignal<Piece>{}
 public class PiecePlaced : ASignal<Piece>{}
+
+public class BoardHeightCalculated : ASignal<float>{}
 
 
 //Player Input Signals

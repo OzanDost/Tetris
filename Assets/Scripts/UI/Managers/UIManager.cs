@@ -30,25 +30,24 @@ namespace UI.Managers
 
         private void GameManager_OnGameStateChanged(GameState oldState, GameState newState)
         {
-            if (newState == GameState.Loading)
+            switch (newState)
             {
-                _uiFrame.OpenWindow("FakeLoadingWindow");
-            }
-
-            if (newState == GameState.Menu)
-            {
-                _uiFrame.CloseWindow("GameplayWindow");
-                _uiFrame.OpenWindow("MainMenuWindow");
-            }
-
-            if (newState == GameState.Fail)
-            {
-                _uiFrame.OpenWindow("FailPopup");
-            }
-
-            if (newState == GameState.Gameplay)
-            {
-                _uiFrame.OpenWindow("GameplayWindow");
+                case GameState.Loading:
+                    _uiFrame.OpenWindow("FakeLoadingWindow");
+                    break;
+                case GameState.Menu:
+                    _uiFrame.CloseWindow("GameplayWindow");
+                    _uiFrame.OpenWindow("MainMenuWindow");
+                    break;
+                case GameState.Fail:
+                    _uiFrame.OpenWindow("FailPopup");
+                    break;
+                case GameState.Success:
+                    _uiFrame.OpenWindow("SuccessPopup");
+                    break;
+                case GameState.Gameplay:
+                    _uiFrame.OpenWindow("GameplayWindow");
+                    break;
             }
         }
     }

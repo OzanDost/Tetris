@@ -36,7 +36,7 @@ namespace Game
         {
             SubscribeToEvents();
 
-            Pieces = new List<Piece>(250);
+            Pieces = new List<Piece>(50);
             CurrentPieceIndex = 0;
             _gameConfig = ConfigHelper.Config;
 
@@ -104,7 +104,8 @@ namespace Game
 
             if (shouldSendEvent)
             {
-                Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds, PieceSpawnPoint);
+                Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds,
+                    StageFinishLine.HorizontalBounds, PieceSpawnPoint);
             }
         }
 
@@ -116,6 +117,16 @@ namespace Game
             if (reachedPiece == _lastPieceTouchedFinishLine) return;
 
             _lastPieceTouchedFinishLine = reachedPiece;
+
+            CalculateHeight();
+            Signals.Get<LevelFinished>().Dispatch(true);
+
+            IsActive = false;
+
+            if (CurrentPiece != null)
+            {
+                PoolManager.Instance.ReturnPiece(CurrentPiece);
+            }
 
             FreezePlacedPieces();
         }
@@ -159,6 +170,7 @@ namespace Game
         {
             if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
             {
+                IsActive = false;
                 Signals.Get<LevelFinished>().Dispatch(false);
                 return;
             }
@@ -205,17 +217,33 @@ namespace Game
 
         private void OnPiecePlaced()
         {
+            if (!IsActive) return;
             if (CurrentPieceIndex + 1 >= Pieces.Count)
             {
                 GeneratePieces(50);
             }
 
             Signals.Get<PiecePlaced>().Dispatch(CurrentPiece);
-            
+
             Debug.Log("Piece Placed");
             ActivatePiece();
         }
 
+
+        private void CalculateHeight()
+        {
+            var bounds = new Bounds();
+            for (int i = 0; i < CurrentPieceIndex; i++)
+            {
+                if (Pieces[i].State != PieceState.Placed) continue;
+                foreach (var pieceCollider in Pieces[i].Colliders)
+                {
+                    bounds.Encapsulate(pieceCollider.bounds);
+                }
+            }
+
+            Signals.Get<BoardHeightCalculated>().Dispatch(bounds.size.y);
+        }
 
         public void ResetBoard()
         {

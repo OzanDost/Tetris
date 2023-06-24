@@ -12,10 +12,8 @@ namespace Game
         [SerializeField] private Transform _cameraLookAtTarget;
         [SerializeField] private CinemachineImpulseSource _impulseSource;
         private Bounds _bounds;
-        private List<Transform> _targets;
+        private List<List<Transform>> _targets;
 
-        public Vector3 impulseAmplitude = new Vector3(1.0f, 1.0f, 1.0f);
-        public float shakeDuration = 0.5f;
 
         private void Awake()
         {
@@ -23,7 +21,7 @@ namespace Game
             Signals.Get<GameStateChanged>().AddListener(OnGameStateChanged);
             Signals.Get<AIMistakesFilled>().AddListener(OnAiMistakesFilled);
             Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
-            _targets = new List<Transform>(4);
+            _targets = new List<List<Transform>>(2);
         }
 
         private void OnCurrentPieceChanged(Piece piece)
@@ -33,12 +31,6 @@ namespace Game
 
         private void ShakeCamera()
         {
-            Vector3 impulse = new Vector3(
-                Random.Range(-impulseAmplitude.x, impulseAmplitude.x),
-                Random.Range(-impulseAmplitude.y, impulseAmplitude.y),
-                Random.Range(-impulseAmplitude.z, impulseAmplitude.z)
-            );
-
             _impulseSource.GenerateImpulse(0.1f);
         }
 
@@ -58,45 +50,47 @@ namespace Game
             }
         }
 
-        private void OnBoardArranged(Transform[] groundBounds, Transform pieceSpawner)
+        private void OnBoardArranged(Transform[] groundBounds, Transform[] finishBounds, Transform pieceSpawner)
         {
-            _targets.AddRange(groundBounds);
-            _targets.Add(pieceSpawner);
+            var boardTargets = new List<Transform>(groundBounds.Length + finishBounds.Length + 1);
+            boardTargets.AddRange(groundBounds);
+            boardTargets.AddRange(finishBounds);
+            boardTargets.Add(pieceSpawner);
 
+            _targets.Add(boardTargets);
             CreateViewBox();
         }
 
         private void CreateViewBox()
         {
-            foreach (Transform target in _targets)
+            foreach (List<Transform> targetList in _targets)
             {
-                _bounds.Encapsulate(target.position);
+                foreach (Transform target in targetList)
+                {
+                    _bounds.Encapsulate(target.position);
+                }
             }
 
-            SetOrthographicSizeToFitBounds(_bounds, 0.75f);
-            _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y / 3f, _bounds.center.z);
+            SetOrthographicSizeToFitBounds(_bounds, 1.25f);
+            // _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y / 3f, _bounds.center.z);
+            _cameraLookAtTarget.position = _bounds.center;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.green;
+
+            Gizmos.DrawWireCube(_bounds.center, _bounds.size);
         }
 
         private void SetOrthographicSizeToFitBounds(Bounds targetBounds, float paddingFactor)
         {
-            float cameraAspect = _virtualCamera.m_Lens.Aspect;
-            float boundsAspect = targetBounds.size.x / targetBounds.size.y;
-
             float orthographicSize;
 
-            // If camera aspect is greater than the bounds aspect, calculate size based on width
-            if (cameraAspect > boundsAspect)
-            {
-                orthographicSize = targetBounds.extents.x / cameraAspect;
-            }
-            else
-            {
-                // Otherwise, calculate size based on height
-                orthographicSize = targetBounds.extents.y;
-            }
+            orthographicSize = targetBounds.size.x;
 
             // Add padding
-            orthographicSize += orthographicSize * paddingFactor;
+            orthographicSize *= paddingFactor;
 
             _virtualCamera.m_Lens.OrthographicSize = orthographicSize;
         }
