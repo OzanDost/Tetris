@@ -1,3 +1,4 @@
+using Enums;
 using ThirdParty;
 using ThirdParty.uiframework.Window;
 using UnityEngine;
@@ -26,12 +27,12 @@ namespace UI.Popups
 
         private void OnMultiplayerModeButtonClicked()
         {
-            Signals.Get<MultiplayerModeButtonClicked>().Dispatch();
+            Signals.Get<GameplayRequested>().Dispatch(GameMode.Versus);
         }
 
         private void OnSoloModeButtonClicked()
         {
-            Signals.Get<SoloModeButtonClicked>().Dispatch();
+            Signals.Get<GameplayRequested>().Dispatch(GameMode.Solo);
         }
     }
 }

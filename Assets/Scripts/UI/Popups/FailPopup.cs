@@ -19,10 +19,12 @@ namespace UI.Popups
 
         private void OnQuitButtonClicked()
         {
+            Signals.Get<LevelQuit>().Dispatch();
         }
 
         private void OnRetryButtonClicked()
         {
+            
         }
     }
 }

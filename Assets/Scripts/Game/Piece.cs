@@ -11,8 +11,8 @@ namespace Game
         public PieceType PieceType => _pieceType;
         public Rigidbody2D Rigidbody2D => _rigidbody2D;
         public Collider2D[] Colliders => _colliders;
-        
         public SpriteRenderer[] SpriteRenderers => _spriteRenderers;
+        public Bounds PieceBounds { get; private set; }
 
 
         [SerializeField] private Rigidbody2D _rigidbody2D;
@@ -26,6 +26,17 @@ namespace Game
 
         public event Action<PieceState, PieceState> PieceStateChanged;
         public bool IsInPool { get; set; }
+
+        private void SetBounds()
+        {
+            var bounds = new Bounds(transform.position, Vector3.zero);
+            foreach (var pieceCollider in _colliders)
+            {
+                bounds.Encapsulate(pieceCollider.bounds);
+            }
+
+            PieceBounds = bounds;
+        }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -60,9 +71,12 @@ namespace Game
             ChangeState(PieceState.Inactive);
             gameObject.SetActive(false);
             _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            
             ToggleColliderTriggers(true);
             ToggleLayer(false);
+
             transform.localEulerAngles = Vector3.zero;
+            transform.localScale = Vector3.one;
         }
 
         public void Activate()
@@ -70,6 +84,8 @@ namespace Game
             gameObject.SetActive(true);
             ToggleColliderTriggers(true);
             ChangeState(PieceState.Active);
+
+            SetBounds();
         }
 
         private void ToggleLayer(bool isPlaced)
@@ -93,6 +109,7 @@ namespace Game
         {
             if (_state != PieceState.Active) return;
             _rigidbody2D.MoveRotation(_rigidbody2D.rotation + 90);
+            SetBounds();
         }
 
         private void ToggleColliderTriggers(bool value)

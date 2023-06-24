@@ -55,25 +55,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 329083328585785207, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 6534074332925128895, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7217350582743283210, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 7423453412129140062, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -5
-      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 326099525462597787, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
+--- !u!61 &1632338416152632172 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 7887476888247624974, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
+  m_PrefabInstance: {fileID: 8922415177242656354}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1810462106891701466 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7129977647950459576, guid: 30b9df3b37e844e85bdfadd7378351d0, type: 3}
@@ -132,5 +121,6 @@ MonoBehaviour:
   PieceSpawnPoint: {fileID: 9170431512435351829}
   StageFinishLine: {fileID: 1810462106891701466}
   FallZone: {fileID: 3951120454257319982}
+  _pieceConfiner: {fileID: 1632338416152632172}
   _ground: {fileID: 7175223643888220583}
   _actionInterval: 1

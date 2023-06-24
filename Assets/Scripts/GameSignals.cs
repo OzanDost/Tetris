@@ -19,18 +19,14 @@ public class LevelFinished : ASignal<bool>{}
 public class LevelQuit : ASignal{}
 public class PauseRequested : ASignal{}
 public class PauseCanceled : ASignal{}
+public class GameplayRequested : ASignal<GameMode>{}
 
 
 //UI Signals
 
 public class FakeLoadingFinished : ASignal{}
-public class PlayButtonClicked : ASignal{}
-public class VersusButtonClicked : ASignal{}
-public class ContinueButtonClicked : ASignal{}
-public class SoloPlayButtonClicked : ASignal{}
-public class MultiplayerPlayButtonClicked : ASignal{}
-public class SoloModeButtonClicked : ASignal{}
-public class MultiplayerModeButtonClicked : ASignal{}
+public class RetryButtonClicked : ASignal{}
+
 
 // Powerup Signals
 
@@ -40,8 +36,8 @@ public class OnFreezeButtonClicked : ASignal{}
 //Board Signals
 
 public class CurrentPieceChanged : ASignal<Piece>{}
+public class NextPieceChanged : ASignal<Piece>{}
 public class PiecePlaced : ASignal<Piece>{}
-
 public class BoardHeightCalculated : ASignal<float>{}
 
 

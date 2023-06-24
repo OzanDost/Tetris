@@ -40,12 +40,12 @@ namespace UI.Windows
             if (_currentLiveIndex >= _lives.Length)
                 return;
 
+            _currentLiveIndex++;
+            
             for (int i = 0; i < _currentLiveIndex; i++)
             {
                 _lives[i].gameObject.SetActive(false);
             }
-
-            _currentLiveIndex++;
         }
 
         private void OnLightningButtonClicked()

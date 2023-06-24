@@ -22,13 +22,14 @@ namespace Game
         private Vector2 _movementInput;
         private GameConfig _gameConfig;
         private Tween _freezeDelayTween;
+        private Bounds _pieceMovementBounds;
 
         protected Piece CurrentPiece { get; set; }
 
         [SerializeField] protected Transform PieceSpawnPoint;
         [SerializeField] protected StageFinishLine StageFinishLine;
         [SerializeField] protected FallZone FallZone;
-
+        [SerializeField] private BoxCollider2D _pieceConfiner;
         [SerializeField] private Ground _ground;
 
 
@@ -46,6 +47,7 @@ namespace Game
 
             if (IsPaused) TogglePause();
             IsActive = true;
+            _pieceMovementBounds = _pieceConfiner.bounds;
         }
 
         protected virtual void SubscribeToEvents()
@@ -121,14 +123,7 @@ namespace Game
             CalculateHeight();
             Signals.Get<LevelFinished>().Dispatch(true);
 
-            IsActive = false;
-
-            if (CurrentPiece != null)
-            {
-                PoolManager.Instance.ReturnPiece(CurrentPiece);
-            }
-
-            FreezePlacedPieces();
+            OnLevelFinished(true);
         }
 
         protected virtual void OnPieceFellOffBoard(Collider2D pieceCollider)
@@ -170,8 +165,7 @@ namespace Game
         {
             if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
             {
-                IsActive = false;
-                Signals.Get<LevelFinished>().Dispatch(false);
+                OnLevelFinished(false);
                 return;
             }
 
@@ -190,6 +184,7 @@ namespace Game
 
             CurrentPieceIndex++;
             Signals.Get<CurrentPieceChanged>().Dispatch(CurrentPiece);
+            Signals.Get<NextPieceChanged>().Dispatch(Pieces[CurrentPieceIndex]);
         }
 
         private void FreezePlacedPieces()
@@ -198,9 +193,8 @@ namespace Game
             {
                 for (int i = 0; i < CurrentPieceIndex - 1; i++)
                 {
-                    if (Pieces[i].State != PieceState.Placed) continue;
+                    if (Pieces[i].State == PieceState.Inactive) continue;
                     Pieces[i].SetRigidbodyMode(RigidbodyType2D.Static);
-                    //todo add shiny effect here;
                 }
             });
         }
@@ -229,6 +223,13 @@ namespace Game
             ActivatePiece();
         }
 
+        private void OnLevelFinished(bool isSuccess)
+        {
+            IsActive = false;
+            FreezePlacedPieces();
+            PoolManager.Instance.ReturnPiece(CurrentPiece);
+            Signals.Get<LevelFinished>().Dispatch(isSuccess);
+        }
 
         private void CalculateHeight()
         {
@@ -285,6 +286,9 @@ namespace Game
             float xMovement = piecePosition.x + _movementInput.x;
             float yMovement = piecePosition.y + _movementInput.y * _gameConfig.HorizontalMoveSpeed * Time.deltaTime;
             Vector2 newPosition = new Vector2(xMovement, yMovement);
+
+            newPosition.x = Mathf.Clamp(newPosition.x, _pieceMovementBounds.min.x + CurrentPiece.PieceBounds.extents.x,
+                _pieceMovementBounds.max.x - CurrentPiece.PieceBounds.extents.x);
 
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
             _movementInput.x = 0;

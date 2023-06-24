@@ -9,6 +9,9 @@ namespace Game.Managers
     {
         public GameState CurrentGameState { get; private set; }
 
+        private GameMode _lastGameMode;
+
+
         private void Awake()
         {
             ApplyConfigs();
@@ -19,14 +22,12 @@ namespace Game.Managers
             // Subscribing to events
             Signals.Get<RequestGameStateChange>().AddListener(OnGameStateChangeRequested);
             Signals.Get<FakeLoadingFinished>().AddListener(OnFakeLoadingFinished);
-            Signals.Get<SoloModeButtonClicked>().AddListener(OnSoloModeButtonClicked);
-            Signals.Get<MultiplayerModeButtonClicked>().AddListener(OnMultiplayerModeButtonClicked);
+            Signals.Get<GameplayRequested>().AddListener(OnGameplayRequested);
             Signals.Get<LevelFinished>().AddListener(OnLevelFinished);
             Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
+            Signals.Get<RetryButtonClicked>().AddListener(OnRetryButtonClicked);
 
             //todo change here
-            Signals.Get<PlayButtonClicked>().AddListener(OnPlayButtonClicked);
-            Signals.Get<VersusButtonClicked>().AddListener(OnVersusButtonClicked);
 
             ChangeGameState(GameState.Loading);
 
@@ -36,24 +37,17 @@ namespace Game.Managers
             SaveManager.Initialize();
         }
 
-        private void OnVersusButtonClicked()
+        private void OnRetryButtonClicked()
+        {
+            OnLevelQuit();
+            OnGameplayRequested(_lastGameMode);
+        }
+
+
+        private void OnGameplayRequested(GameMode gameMode)
         {
             ChangeGameState(GameState.Gameplay);
-            Signals.Get<GameplayStarted>().Dispatch(GameMode.Versus);
-        }
-
-        private void OnPlayButtonClicked()
-        {
-            ChangeGameState(GameState.Gameplay);
-            Signals.Get<GameplayStarted>().Dispatch(GameMode.Solo);
-        }
-
-        private void OnMultiplayerModeButtonClicked()
-        {
-        }
-
-        private void OnSoloModeButtonClicked()
-        {
+            Signals.Get<GameplayStarted>().Dispatch(gameMode);
         }
 
         private void ApplyConfigs()
@@ -61,21 +55,6 @@ namespace Game.Managers
             int refreshRate = Screen.currentResolution.refreshRate;
             Application.targetFrameRate = refreshRate % 60 == 0 ? 60 : Screen.currentResolution.refreshRate;
             DOTween.Init().SetCapacity(200, 150);
-        }
-
-        private void MainMenu_OnContinueButtonClicked()
-        {
-            ChangeGameState(GameState.Gameplay);
-        }
-
-        private void Success_OnContinueButtonClicked()
-        {
-            ChangeGameState(GameState.Menu);
-        }
-
-        private void OnReturnToMenuRequested()
-        {
-            
         }
 
         private void OnLevelQuit()

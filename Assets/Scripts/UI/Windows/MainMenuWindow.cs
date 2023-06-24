@@ -1,3 +1,4 @@
+using Enums;
 using ThirdParty;
 using ThirdParty.uiframework.Window;
 using UnityEngine;
@@ -19,12 +20,12 @@ namespace UI.Windows
 
         private void OnVersusButtonClicked()
         {
-            Signals.Get<VersusButtonClicked>().Dispatch();
+            Signals.Get<GameplayRequested>().Dispatch(GameMode.Versus);
         }
 
         private void OnPlayButtonClicked()
         {
-            Signals.Get<PlayButtonClicked>().Dispatch();
+            Signals.Get<GameplayRequested>().Dispatch(GameMode.Solo);
         }
     }
 }

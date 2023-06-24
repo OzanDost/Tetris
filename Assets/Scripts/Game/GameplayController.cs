@@ -60,7 +60,7 @@ namespace Game
             {
                 if (_opponentBoardController != null)
                 {
-                    Destroy(_opponentBoardController.gameObject);
+                    _opponentBoardController.gameObject.SetActive(false);
                 }
             }
         }

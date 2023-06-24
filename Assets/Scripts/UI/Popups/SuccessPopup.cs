@@ -26,11 +26,6 @@ namespace UI.Popups
         private float _targetScore;
 
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
         protected override void AddListeners()
         {
             base.AddListeners();
@@ -90,6 +85,8 @@ namespace UI.Popups
 
         private void OnContinueButtonClicked()
         {
+            // Signals.Get<MainMenuRequested>().Dispatch();
+            Signals.Get<LevelQuit>().Dispatch();
         }
     }
 
