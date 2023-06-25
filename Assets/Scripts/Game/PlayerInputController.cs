@@ -28,7 +28,7 @@ namespace Game
             Signals.Get<PauseRequested>().AddListener(OnPaused);
             Signals.Get<PauseCanceled>().AddListener(OnPauseCanceled);
             Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
-            
+
             _verticalSpeedSignal = Signals.Get<VerticalSpeedToggled>();
             _horizontalInputSignal = Signals.Get<HorizontalInputGiven>();
             _rotateSignal = Signals.Get<RotateInputGiven>();
@@ -55,9 +55,14 @@ namespace Game
                 ProcessDraggingInput();
             }
 
-            if (InputManager.GetMouseButtonUp() && !_pieceMoved)
+            if (InputManager.GetMouseButtonUp())
             {
-                _rotateSignal.Dispatch();
+                if (!_pieceMoved)
+                {
+                    _rotateSignal.Dispatch();
+                }
+
+                _verticalSpeedSignal.Dispatch(false);
             }
         }
 
@@ -71,16 +76,16 @@ namespace Game
         private void ProcessDraggingInput()
         {
             var currentInputPos = InputManager.GetMousePosition();
-            var delta = _inputStartPos - currentInputPos;
+            var delta = currentInputPos - _inputStartPos;
 
             if (Mathf.Abs(delta.y) > 10f)
             {
                 _verticalSpeedSignal.Dispatch(true);
                 _pieceMoved = true;
             }
-            else if (Mathf.Abs(delta.x) > 10f)
+            else if (Mathf.Abs(delta.x) > 15f)
             {
-                _horizontalInputSignal.Dispatch(InputManager.DeltaMousePosition.x);
+                _horizontalInputSignal.Dispatch(delta.normalized.x);
                 _inputStartPos = currentInputPos;
                 delta.x = 0;
                 _pieceMoved = true;
@@ -90,6 +95,9 @@ namespace Game
         private void OnCurrentPieceChanged(Piece piece)
         {
             _isTakingInput = false;
+            _pieceMoved = false;
+            _inputStartPos = InputManager.GetMousePosition();
+            _verticalSpeedSignal.Dispatch(false);
         }
 
         private void OnPauseCanceled()

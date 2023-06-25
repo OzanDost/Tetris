@@ -1,4 +1,3 @@
-using Enums;
 using Game;
 using ThirdParty;
 using UnityEngine;
@@ -19,18 +18,12 @@ namespace UI.Widgets
         private void Awake()
         {
             Signals.Get<NextPieceChanged>().AddListener(OnNextPieceChanged);
-            Signals.Get<GameStateChanged>().AddListener(OnGameStateChanged);
 
             _minSize = Mathf.Min(_confiner.rect.width, _confiner.rect.height);
             _gridSize = 4;
         }
 
-        private void OnGameStateChanged(GameState oldState, GameState newState)
-        {
-        }
-
-
-        [Sirenix.OdinInspector.Button]
+        
         private void OnNextPieceChanged(Piece piece)
         {
             foreach (var square in _squares)

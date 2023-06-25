@@ -262,7 +262,7 @@ namespace Game
         protected void MovePieceHorizontally(float direction)
         {
             if (!IsActive || IsPaused) return;
-            _movementInput.x = direction > 0 ? 0.75f : -0.75f;
+            _movementInput.x = direction > 0f ? 0.5f : -0.5f;
         }
 
         protected void RotatePiece()
@@ -291,8 +291,9 @@ namespace Game
                 _pieceMovementBounds.max.x - CurrentPiece.PieceBounds.extents.x);
 
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
-            _movementInput.x = 0;
-            _movementInput.y = -_gameConfig.VerticalMoveSpeed;
+            
+            _movementInput.x = 0f;
+            // _movementInput.y = -_gameConfig.VerticalMoveSpeed;
         }
 
 

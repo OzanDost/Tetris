@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Screen = UnityEngine.Device.Screen;
 
 namespace Game.Managers
 {
@@ -8,18 +7,8 @@ namespace Game.Managers
     {
         private static Vector2 _firstMousePosition;
         private static Vector2 _lastMousePosition;
-        private static float _mouseDownTime;
-        private static float _dragTime;
-        private float ScreenDPI => Screen.dpi;
-        private Camera GameCamera { get; set; }
 
         public static Vector2 DeltaMousePosition { get; set; }
-
-
-        private void SetGameCamera(Camera camera)
-        {
-            GameCamera = camera;
-        }
 
         private void Update()
         {
@@ -28,14 +17,12 @@ namespace Game.Managers
                 _firstMousePosition = GetMousePosition();
                 _lastMousePosition = _firstMousePosition;
                 DeltaMousePosition = Vector2.zero;
-                _mouseDownTime = Time.time;
             }
             else if (GetMouseButton() || GetMouseButtonUp())
             {
                 var mousePosition = GetMousePosition();
                 DeltaMousePosition = mousePosition - _lastMousePosition;
                 _lastMousePosition = mousePosition;
-                _dragTime = Time.time;
             }
             else
             {
