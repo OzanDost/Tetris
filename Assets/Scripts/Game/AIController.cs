@@ -68,6 +68,7 @@ namespace Game
 
         protected override void CheckMistakes(bool isPlacedPiece)
         {
+            if (!IsActive) return;
             if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
             {
                 Signals.Get<AIMistakesFilled>().Dispatch();
@@ -85,7 +86,7 @@ namespace Game
         protected override void ActivatePiece()
         {
             // if (!IsActive || IsPaused) return;
-            
+
             CurrentPiece = Pieces[CurrentPieceIndex];
             CurrentPiece.transform.position = PieceSpawnPoint.position;
             CurrentPiece.Activate();

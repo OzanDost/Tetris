@@ -96,9 +96,9 @@ namespace Game
 
         private void ArrangeBoard(bool shouldSendEvent)
         {
-            _ground.transform.localPosition = Vector3.zero;
-            FallZone.transform.localPosition = new Vector3(0, -5f, 0);
-            StageFinishLine.SetLocalHeight(ConfigHelper.Config.TargetHeight);
+            var groundPosition = _ground.transform.localPosition;
+            FallZone.transform.localPosition = groundPosition - new Vector3(0, 5f, 0);
+            StageFinishLine.SetLocalHeight(groundPosition.y + ConfigHelper.Config.TargetHeight);
             PieceSpawnPoint.localPosition = StageFinishLine.transform.localPosition + Vector3.up * 5f;
 
             if (shouldSendEvent)

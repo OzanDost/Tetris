@@ -12,21 +12,11 @@ namespace Game
             PieceReachedStageTarget?.Invoke(other);
         }
 
-        public void SetLocalHeight(int height)
+        public void SetLocalHeight(float height)
         {
             var position = transform.localPosition;
             position = new Vector3(position.x, height, position.z);
             transform.localPosition = position;
-            gameObject.SetActive(true);
-        }
-
-        public void IncreaseHeight(int additionalHeight)
-        {
-            var position = transform.position;
-            position = new Vector3(position.x, position.y + additionalHeight, position.z);
-            transform.position = position;
-            gameObject.SetActive(true);
-            Debug.Log("Activated finish line");
         }
     }
 }

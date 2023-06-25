@@ -71,7 +71,9 @@ namespace Game
                 }
             }
 
-            SetOrthographicSizeToFitBounds(_bounds, 1.25f);
+            var targetPadding = _targets.Count > 1 ? 1.75f : 1f;
+
+            SetOrthographicSizeToFitBounds(_bounds, targetPadding);
             // _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y / 3f, _bounds.center.z);
             _cameraLookAtTarget.position = _bounds.center;
         }
@@ -85,9 +87,9 @@ namespace Game
 
         private void SetOrthographicSizeToFitBounds(Bounds targetBounds, float paddingFactor)
         {
-            float orthographicSize;
-
-            orthographicSize = targetBounds.size.x;
+            float orthographicSize = targetBounds.size.x > targetBounds.size.y
+                ? targetBounds.size.x * Screen.height / Screen.width * 0.5f
+                : targetBounds.size.y * 0.5f;
 
             // Add padding
             orthographicSize *= paddingFactor;

@@ -19,4 +19,4 @@ MonoBehaviour:
   verticalMoveSpeed: 0.5
   verticalFastMoveSpeed: 2
   _allowedMistakeCount: 5
-  _targetHeight: 30
+  _targetHeight: 40

@@ -21,6 +21,7 @@ namespace Editor
         private GameObject _basePiece;
         private GameObject _pieceToCreate;
         private Shader _basePieceShader;
+        private string _enumName;
 
         public string pieceName;
 
@@ -33,6 +34,7 @@ namespace Editor
         public Color pieceColor;
 
         [BoxGroup]
+        [PropertySpace(spaceBefore: 10)]
         [TableMatrix(DrawElementMethod = nameof(DrawCell), SquareCells = true, ResizableColumns = false)]
         public bool[,] customCellDrawings = new bool[4, 4];
 
@@ -50,6 +52,12 @@ namespace Editor
             _basePieceShader = AssetDatabase.LoadAssetAtPath<Shader>(ShaderPath);
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            ClearPiecesInScene();
+        }
+
         private bool DrawCell(Rect rect, bool value)
         {
             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
@@ -61,6 +69,15 @@ namespace Editor
 
             EditorGUI.DrawRect(rect.Padding(1), value ? Color.black : Color.white);
             return value;
+        }
+
+        private void ClearPiecesInScene()
+        {
+            var pieces = FindObjectsOfType<Piece>(true);
+            foreach (var piece in pieces)
+            {
+                DestroyImmediate(piece.gameObject);
+            }
         }
 
 
@@ -95,11 +112,11 @@ namespace Editor
             Collider2D[] colliders = new Collider2D[positions.Count];
             SpriteRenderer[] spriteRenderers = new SpriteRenderer[positions.Count];
             var tempMaterial = new Material(_basePieceShader);
-            
-            AssetDatabase.CreateAsset(tempMaterial,$"{MaterialPath}{pieceName}.shader");
+
+            AssetDatabase.CreateAsset(tempMaterial, $"{MaterialPath}{pieceName}.shader");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            
+
             var targetOutlineColor = pieceColor;
 
             targetOutlineColor.r -= 10;
@@ -133,7 +150,7 @@ namespace Editor
             pieceComponent.SetReferencesFromEditor(colliders, pieceType);
 
             PrefabUtility.RecordPrefabInstancePropertyModifications(_pieceToCreate);
-            
+
             var savedPrefab = PrefabUtility.SaveAsPrefabAsset(_pieceToCreate, $"{PiecePath}/Piece_{pieceName}.prefab");
 
             EditorGUIUtility.PingObject(savedPrefab);

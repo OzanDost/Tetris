@@ -48,6 +48,7 @@ namespace Game.Managers
         {
             ChangeGameState(GameState.Gameplay);
             Signals.Get<GameplayStarted>().Dispatch(gameMode);
+            Signals.Get<TogglePause>().Dispatch(false);
         }
 
         private void ApplyConfigs()
