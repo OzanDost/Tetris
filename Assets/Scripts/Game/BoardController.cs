@@ -45,7 +45,7 @@ namespace Game
             ArrangeBoard(true);
             ActivatePiece();
 
-            if (IsPaused) TogglePause();
+            IsPaused = false;
             IsActive = true;
             _pieceMovementBounds = _pieceConfiner.bounds;
         }
@@ -55,8 +55,7 @@ namespace Game
             StageFinishLine.PieceReachedStageTarget += OnPieceReachedStageTarget;
             FallZone.PieceFellOffBoard += OnPieceFellOffBoard;
 
-            Signals.Get<PauseRequested>().AddListener(TogglePause);
-            Signals.Get<PauseCanceled>().AddListener(TogglePause);
+            Signals.Get<TogglePause>().AddListener(OnPauseToggled);
             Signals.Get<LivesFinished>().AddListener(OnLivesFinished);
             Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
             Signals.Get<RotateInputGiven>().AddListener(RotatePiece);
@@ -69,13 +68,18 @@ namespace Game
             StageFinishLine.PieceReachedStageTarget -= OnPieceReachedStageTarget;
             FallZone.PieceFellOffBoard -= OnPieceFellOffBoard;
 
-            Signals.Get<PauseRequested>().RemoveListener(TogglePause);
-            Signals.Get<PauseCanceled>().RemoveListener(TogglePause);
+            Signals.Get<TogglePause>().RemoveListener(OnPauseToggled);
             Signals.Get<LivesFinished>().RemoveListener(OnLivesFinished);
             Signals.Get<LevelQuit>().RemoveListener(OnLevelQuit);
             Signals.Get<RotateInputGiven>().RemoveListener(RotatePiece);
             Signals.Get<HorizontalInputGiven>().RemoveListener(MovePieceHorizontally);
             Signals.Get<VerticalSpeedToggled>().RemoveListener(ToggleVerticalSpeed);
+        }
+
+        private void OnPauseToggled(bool isPaused)
+        {
+            IsPaused = isPaused;
+            Time.timeScale = isPaused ? 0 : 1;
         }
 
         private void OnLivesFinished()
@@ -88,13 +92,6 @@ namespace Game
             IsActive = false;
             ResetBoard();
             UnsubscribeFromEvents();
-        }
-
-        private void TogglePause()
-        {
-            IsPaused = !IsPaused;
-
-            Time.timeScale = IsPaused ? 0 : 1;
         }
 
         private void ArrangeBoard(bool shouldSendEvent)
@@ -291,7 +288,7 @@ namespace Game
                 _pieceMovementBounds.max.x - CurrentPiece.PieceBounds.extents.x);
 
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
-            
+
             _movementInput.x = 0f;
             // _movementInput.y = -_gameConfig.VerticalMoveSpeed;
         }

@@ -24,7 +24,7 @@ namespace UI.Popups
 
         private void OnRetryButtonClicked()
         {
-            
+            Signals.Get<RetryButtonClicked>().Dispatch();
         }
     }
 }

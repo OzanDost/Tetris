@@ -20,12 +20,12 @@ namespace UI.Managers
 
             // Subscribing to events
             Signals.Get<GameStateChanged>().AddListener(GameManager_OnGameStateChanged);
-            Signals.Get<PauseRequested>().AddListener(OnPauseRequested);
+            Signals.Get<TogglePause>().AddListener(OnToggledPause);
         }
 
-        private void OnPauseRequested()
+        private void OnToggledPause(bool isPaused)
         {
-            _uiFrame.OpenWindow("PausePopup");
+            if (isPaused) _uiFrame.OpenWindow("PausePopup");
         }
 
         private void GameManager_OnGameStateChanged(GameState oldState, GameState newState)

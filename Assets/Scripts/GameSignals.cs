@@ -17,8 +17,7 @@ public class LivesFinished : ASignal{}
 
 public class LevelFinished : ASignal<bool>{}
 public class LevelQuit : ASignal{}
-public class PauseRequested : ASignal{}
-public class PauseCanceled : ASignal{}
+public class TogglePause: ASignal<bool>{}
 public class GameplayRequested : ASignal<GameMode>{}
 
 

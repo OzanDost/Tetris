@@ -22,13 +22,13 @@ namespace UI.Popups
         private void OnQuitButtonClicked()
         {
             Signals.Get<LevelQuit>().Dispatch();
-            Signals.Get<PauseCanceled>().Dispatch();
+            Signals.Get<TogglePause>().Dispatch(false);
         }
 
         private void OnResumeButtonClicked()
         {
             CloseRequest?.Invoke(this);
-            Signals.Get<PauseCanceled>().Dispatch();
+            Signals.Get<TogglePause>().Dispatch(false);
         }
     }
 }

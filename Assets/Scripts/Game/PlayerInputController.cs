@@ -25,8 +25,7 @@ namespace Game
         {
             Signals.Get<GameplayStarted>().AddListener(OnGameplayStarted);
             Signals.Get<LevelFinished>().AddListener(OnLevelFinished);
-            Signals.Get<PauseRequested>().AddListener(OnPaused);
-            Signals.Get<PauseCanceled>().AddListener(OnPauseCanceled);
+            Signals.Get<TogglePause>().AddListener(OnPauseToggled);
             Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
 
             _verticalSpeedSignal = Signals.Get<VerticalSpeedToggled>();
@@ -100,15 +99,11 @@ namespace Game
             _verticalSpeedSignal.Dispatch(false);
         }
 
-        private void OnPauseCanceled()
+        private void OnPauseToggled(bool isPaused)
         {
-            _canGiveInput = true;
+            _canGiveInput = !isPaused;
         }
-
-        private void OnPaused()
-        {
-            _canGiveInput = false;
-        }
+        
 
         private void OnLevelFinished(bool isSuccess)
         {

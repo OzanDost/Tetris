@@ -59,7 +59,7 @@ namespace UI.Windows
 
         private void OnPauseButtonClicked()
         {
-            Signals.Get<PauseRequested>().Dispatch();
+            Signals.Get<TogglePause>().Dispatch(true);
         }
     }
 }
