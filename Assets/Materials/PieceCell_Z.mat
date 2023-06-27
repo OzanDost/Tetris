@@ -15,7 +15,7 @@ Material:
   - _OUTLINEMODE_SOLID
   - _OUTLINEPOSITION_INSIDE_OVER_SPRITE
   - _OUTLINESHAPE_CONTOUR
-  - _TILEMODE_TILE
+  - _TILEMODE_STRETCH
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -91,7 +91,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Thickness: 10
-    - _TileMode: 1
+    - _TileMode: 0
     - _UVSec: 0
     - _Weight: 0.5
     - _ZWrite: 1

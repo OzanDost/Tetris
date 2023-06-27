@@ -31,7 +31,6 @@ namespace UI.Windows
         {
             base.On_UIOPen();
             _currentLiveIndex = 0;
-            //todo get this from save data
         }
 
         private void OnLifeLost()

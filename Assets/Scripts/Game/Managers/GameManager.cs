@@ -26,9 +26,7 @@ namespace Game.Managers
             Signals.Get<LevelFinished>().AddListener(OnLevelFinished);
             Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
             Signals.Get<RetryButtonClicked>().AddListener(OnRetryButtonClicked);
-
-            //todo change here
-
+            
             ChangeGameState(GameState.Loading);
 
 

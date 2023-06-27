@@ -7,7 +7,9 @@ namespace Editor
 {
     public class TetrisEditor : OdinMenuEditorWindow
     {
-        public PieceCreator pieceCreator;
+        private static PieceCreator _pieceCreator;
+        private static PoolConfigEditor _poolConfigEditor;
+        private static GameConfigEditor _gameConfigEditor;
 
         [MenuItem("Tools/Tetris Editor")]
         private static void OpenWindow()
@@ -16,17 +18,34 @@ namespace Editor
             window.Show();
         }
 
+
         protected override OdinMenuTree BuildMenuTree()
         {
             var tree = new OdinMenuTree();
 
-            if (pieceCreator == null)
+            if (_pieceCreator == null)
             {
-                pieceCreator = CreateInstance<PieceCreator>();
-                pieceCreator.Init();
+                _pieceCreator = CreateInstance<PieceCreator>();
             }
 
-            tree.Add("Piece Creator", pieceCreator);
+            _pieceCreator.Init(this);
+            tree.Add("Piece Creator", _pieceCreator);
+            
+            if (_poolConfigEditor == null)
+            {
+                _poolConfigEditor = CreateInstance<PoolConfigEditor>();
+            }
+            
+            _poolConfigEditor.Init();
+            tree.Add("Pool Config Editor", _poolConfigEditor);
+            
+            if (_gameConfigEditor == null)
+            {
+                _gameConfigEditor = CreateInstance<GameConfigEditor>();
+            }
+            
+            _gameConfigEditor.Init();
+            tree.Add("Game Config Editor", _gameConfigEditor);
 
 
             return tree;
@@ -44,7 +63,7 @@ namespace Editor
                     {
                         if (SirenixEditorGUI.ToolbarButton("Re-Init Piece Creator"))
                         {
-                            pieceCreator.Init();
+                            _pieceCreator.Init(this);
                         }
                     }
                 }

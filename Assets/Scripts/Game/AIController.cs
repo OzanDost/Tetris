@@ -69,7 +69,7 @@ namespace Game
         protected override void CheckMistakes(bool isPlacedPiece)
         {
             if (!IsActive) return;
-            if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
+            if (MistakeCount >= ConfigHelper.Config.WinLoseConditionConfig.AllowedMistakeCount)
             {
                 Signals.Get<AIMistakesFilled>().Dispatch();
                 UnsubscribeFromEvents();

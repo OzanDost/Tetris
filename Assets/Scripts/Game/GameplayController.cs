@@ -1,4 +1,5 @@
 using Enums;
+using Game.Managers;
 using ThirdParty;
 using UnityEngine;
 
@@ -45,8 +46,9 @@ namespace Game
             {
                 if (_opponentBoardController == null)
                 {
-                    //todo change here
-                    var targetPos = new Vector3(20f, 0, 0);
+                    var boardWidth = _playerBoardController.GetWidth();
+                    var targetPos = _playerBoardController.transform.position + Vector3.right *
+                        (boardWidth + ConfigHelper.Config.DistanceBetweenBoards);
                     _opponentBoardController = Instantiate(_aiControllerPrefab, targetPos, Quaternion.identity);
                 }
                 else

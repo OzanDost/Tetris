@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Data;
 using UnityEngine;
 
 namespace DefaultNamespace.Data
@@ -8,5 +9,11 @@ namespace DefaultNamespace.Data
     {
         public List<PoolableItemData> Items => items;
         [SerializeField]private List<PoolableItemData> items;
+        
+        
+        public void AddItem(PoolableItemData item)
+        {
+            items.Add(item);
+        }
     }
 }

@@ -71,7 +71,7 @@ namespace Game
             ChangeState(PieceState.Inactive);
             gameObject.SetActive(false);
             _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            
+
             ToggleColliderTriggers(true);
             ToggleLayer(false);
 
@@ -114,9 +114,9 @@ namespace Game
 
         private void ToggleColliderTriggers(bool value)
         {
-            foreach (var collider in _colliders)
+            foreach (var pieceCollider in _colliders)
             {
-                collider.isTrigger = value;
+                pieceCollider.isTrigger = value;
             }
         }
 
@@ -127,10 +127,12 @@ namespace Game
 
 #if UNITY_EDITOR
 
-        public void SetReferencesFromEditor(Collider2D[] colliders, PieceType pieceType)
+        public void SetReferencesFromEditor(Collider2D[] colliders, SpriteRenderer[] spriteRenderers,
+            PieceType pieceType)
         {
             this._colliders = colliders;
             this._pieceType = pieceType;
+            this._spriteRenderers = spriteRenderers;
         }
 #endif
     }

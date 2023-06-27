@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cinemachine;
 using Enums;
+using Game.Managers;
 using ThirdParty;
 using UnityEngine;
 
@@ -72,10 +73,12 @@ namespace Game
             }
 
             var targetPadding = _targets.Count > 1 ? 1.75f : 1f;
+            var targetOffset = _targets.Count > 1
+                ? ConfigHelper.Config.CameraConfig.AdditionalVerticalOffsetVersusMode
+                : ConfigHelper.Config.CameraConfig.AdditionalVerticalOffsetSingleMode;
 
             SetOrthographicSizeToFitBounds(_bounds, targetPadding);
-            // _cameraLookAtTarget.position = new Vector3(_bounds.center.x, _bounds.size.y / 3f, _bounds.center.z);
-            _cameraLookAtTarget.position = _bounds.center;
+            _cameraLookAtTarget.position = _bounds.center + Vector3.up * targetOffset;
         }
 
         private void OnDrawGizmos()

@@ -13,10 +13,17 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: 
   pieceWeightsDictionary:
-    m_keys: 00000000010000000200000003000000040000000500000006000000
+    m_keys: 00000000010000000300000002000000040000000500000006000000
     m_values: 01000000010000000100000001000000010000000100000001000000
-  horizontalMoveSpeed: 5
-  verticalMoveSpeed: 0.5
-  verticalFastMoveSpeed: 2
-  _allowedMistakeCount: 5
-  _targetHeight: 40
+  _pieceMovementConfig:
+    horizontalMoveSpeed: 5
+    _horizontalMoveStep: 0.5
+    _verticalMoveSpeed: 0.5
+    _verticalFastMoveSpeed: 2
+  _winLoseConditionConfig:
+    _allowedMistakeCount: 5
+    _targetHeight: 40
+  _distanceBetweenBoards: 5
+  _cameraConfig:
+    _additionalVerticalOffsetSingleMode: 2.5
+    _additionalVerticalOffsetVersusMode: 12.7

@@ -12,7 +12,7 @@
         _Thickness ("Width (Max recommended 100)", float) = 10
 		[KeywordEnum(Solid, Gradient, Image)] _OutlineMode("Outline mode", Float) = 0
 		[KeywordEnum(Contour, Frame)] _OutlineShape("Outline shape", Float) = 0
-		[KeywordEnum(Inside under sprite, Inside over sprite, Outside)] _OutlinePosition("Outline Position (Frame Only)", Float) = 0
+		[KeywordEnum(Inside under sprite, Inside over sprite, Outside)] _OutlinePosition("Outline Position (Frame Only)", Float) = 1
 
 		[Header(Solid Settings)]
 		_SolidOutline ("Outline Color Base", Color) = (1,1,1,1)

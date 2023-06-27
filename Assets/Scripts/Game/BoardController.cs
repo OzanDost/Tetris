@@ -56,7 +56,6 @@ namespace Game
             FallZone.PieceFellOffBoard += OnPieceFellOffBoard;
 
             Signals.Get<TogglePause>().AddListener(OnPauseToggled);
-            Signals.Get<LivesFinished>().AddListener(OnLivesFinished);
             Signals.Get<LevelQuit>().AddListener(OnLevelQuit);
             Signals.Get<RotateInputGiven>().AddListener(RotatePiece);
             Signals.Get<HorizontalInputGiven>().AddListener(MovePieceHorizontally);
@@ -69,7 +68,6 @@ namespace Game
             FallZone.PieceFellOffBoard -= OnPieceFellOffBoard;
 
             Signals.Get<TogglePause>().RemoveListener(OnPauseToggled);
-            Signals.Get<LivesFinished>().RemoveListener(OnLivesFinished);
             Signals.Get<LevelQuit>().RemoveListener(OnLevelQuit);
             Signals.Get<RotateInputGiven>().RemoveListener(RotatePiece);
             Signals.Get<HorizontalInputGiven>().RemoveListener(MovePieceHorizontally);
@@ -80,11 +78,6 @@ namespace Game
         {
             IsPaused = isPaused;
             Time.timeScale = isPaused ? 0 : 1;
-        }
-
-        private void OnLivesFinished()
-        {
-            //todo bring in the finishing piece
         }
 
         protected void OnLevelQuit()
@@ -98,7 +91,7 @@ namespace Game
         {
             var groundPosition = _ground.transform.localPosition;
             FallZone.transform.localPosition = groundPosition - new Vector3(0, 5f, 0);
-            StageFinishLine.SetLocalHeight(groundPosition.y + ConfigHelper.Config.TargetHeight);
+            StageFinishLine.SetLocalHeight(groundPosition.y + ConfigHelper.Config.WinLoseConditionConfig.TargetHeight);
             PieceSpawnPoint.localPosition = StageFinishLine.transform.localPosition + Vector3.up * 5f;
 
             if (shouldSendEvent)
@@ -139,8 +132,6 @@ namespace Game
             CheckMistakes(fallenPiece.State == PieceState.Placed);
 
             PoolManager.Instance.ReturnPiece(fallenPiece);
-
-            Debug.Log($"Piece{fallenPiece.name} Fell off board. Mistake Count: {MistakeCount}");
         }
 
         protected Piece GetPieceFromCollider(Collider2D pieceCollider, out bool foundPiece)
@@ -160,7 +151,7 @@ namespace Game
 
         protected virtual void CheckMistakes(bool isPlacedPiece)
         {
-            if (MistakeCount >= ConfigHelper.Config.AllowedMistakeCount)
+            if (MistakeCount >= ConfigHelper.Config.WinLoseConditionConfig.AllowedMistakeCount)
             {
                 OnLevelFinished(false);
                 return;
@@ -216,7 +207,6 @@ namespace Game
 
             Signals.Get<PiecePlaced>().Dispatch(CurrentPiece);
 
-            Debug.Log("Piece Placed");
             ActivatePiece();
         }
 
@@ -243,10 +233,20 @@ namespace Game
             Signals.Get<BoardHeightCalculated>().Dispatch(bounds.size.y);
         }
 
+        public float GetWidth()
+        {
+            var bounds = new Bounds();
+            foreach (var point in StageFinishLine.HorizontalBounds)
+            {
+                bounds.Encapsulate(point.position);
+            }
+
+            return bounds.size.x;
+        }
+
         public void ResetBoard()
         {
             IsActive = false;
-            //todo make a different thing for saving
             foreach (var piece in Pieces)
             {
                 CurrentPiece.PieceStateChanged -= PieceStateChanged;
@@ -259,7 +259,9 @@ namespace Game
         protected void MovePieceHorizontally(float direction)
         {
             if (!IsActive || IsPaused) return;
-            _movementInput.x = direction > 0f ? 0.5f : -0.5f;
+            _movementInput.x = direction > 0f
+                ? _gameConfig.PieceMovementConfig.HorizontalMoveStep
+                : -_gameConfig.PieceMovementConfig.HorizontalMoveStep;
         }
 
         protected void RotatePiece()
@@ -270,7 +272,9 @@ namespace Game
 
         protected void ToggleVerticalSpeed(bool isSpeedy)
         {
-            _movementInput.y = isSpeedy ? -_gameConfig.VerticalFastMoveSpeed : -_gameConfig.VerticalMoveSpeed;
+            _movementInput.y = isSpeedy
+                ? -_gameConfig.PieceMovementConfig.VerticalFastMoveSpeed
+                : -_gameConfig.PieceMovementConfig.VerticalMoveSpeed;
         }
 
         private void FixedUpdate()
@@ -281,7 +285,8 @@ namespace Game
 
             // Calculate new position based on integer increments
             float xMovement = piecePosition.x + _movementInput.x;
-            float yMovement = piecePosition.y + _movementInput.y * _gameConfig.HorizontalMoveSpeed * Time.deltaTime;
+            float yMovement = piecePosition.y +
+                              _movementInput.y * _gameConfig.PieceMovementConfig.HorizontalMoveSpeed * Time.deltaTime;
             Vector2 newPosition = new Vector2(xMovement, yMovement);
 
             newPosition.x = Mathf.Clamp(newPosition.x, _pieceMovementBounds.min.x + CurrentPiece.PieceBounds.extents.x,
@@ -290,7 +295,6 @@ namespace Game
             CurrentPiece.Rigidbody2D.MovePosition(newPosition);
 
             _movementInput.x = 0f;
-            // _movementInput.y = -_gameConfig.VerticalMoveSpeed;
         }
 
 

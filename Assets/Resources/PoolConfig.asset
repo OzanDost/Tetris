@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 831d5450f8984f61bcbefd13297c1a77, type: 3}
-  m_Name: Pool Config
+  m_Name: PoolConfig
   m_EditorClassIdentifier: 
   items:
   - Piece: {fileID: 1682664971939025248, guid: 97c79b9357c19499ca00755cee21ec94, type: 3}
@@ -24,6 +24,6 @@ MonoBehaviour:
   - Piece: {fileID: 2646123264338977967, guid: bb5bc63cefb5b4987b16f0ebec6d6e16, type: 3}
     InitialGenerationCount: 50
   - Piece: {fileID: 60461461798054144, guid: e29a6cc958d894bf287cd90d4765e7ae, type: 3}
-    InitialGenerationCount: 0
+    InitialGenerationCount: 50
   - Piece: {fileID: 4394803589209074029, guid: 92667fa0706274615b16fe018dd05737, type: 3}
     InitialGenerationCount: 50
