@@ -27,7 +27,7 @@
 		[Header(Image Settings)]
 		_FrameTex ("Frame Texture", 2D) = "white" {}
 		_ImageOutline ("Outline Color Base", Color) = (1,1,1,1)
-		[KeywordEnum(Stretch, Tile)] _TileMode("Frame mode", Float) = 0
+		[KeywordEnum(Stretch, Tile)] _TileMode("Frame mode", Float) = 1
     }
 
 	SubShader

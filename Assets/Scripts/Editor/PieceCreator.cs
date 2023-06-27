@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Data;
@@ -28,40 +29,40 @@ namespace Editor
          AssetSelector(Paths = "Assets/Prefabs/Game/Pieces"), BoxGroup("Edit Piece")]
         [OnValueChanged("OnPieceToEditChanged")]
         [InfoBox("Select a piece to edit, you can edit it or save it as a new piece by changing it's name and type.")]
-        public GameObject pieceToEdit;
+        public GameObject PieceToEdit;
 
         [SerializeField, BoxGroup("Create New Piece Type")]
         private string _newPieceEnum;
 
         [SerializeField, BoxGroup("Create New Piece")]
-        private string pieceName;
+        private string _pieceName;
 
         [SerializeField, BoxGroup("Create New Piece")]
-        private PieceType pieceType;
+        private PieceType _pieceType;
 
         [SerializeField, BoxGroup("Create New Piece")]
         [AssetSelector(Paths = "Assets/Sprites/Game/PieceCells")]
         [ShowInInspector]
-        private Sprite pieceCellSprite;
+        private Sprite _pieceCellSprite;
 
         [SerializeField, BoxGroup("Create New Piece")]
         [ColorPalette]
         [ShowInInspector]
-        private Color pieceColor;
+        private Color _pieceColor;
 
         [SerializeField, BoxGroup("Create New Piece")]
         [PropertySpace(spaceBefore: 10)]
         [TableMatrix(DrawElementMethod = nameof(DrawCell), SquareCells = true, ResizableColumns = false,
             HideColumnIndices = true, HideRowIndices = true)]
         [ShowInInspector]
-        private bool[,] customCellDrawings = new bool[4, 4];
+        private bool[,] _cellMatrix = new bool[4, 4];
 
         private GameObject _basePiece;
         private GameObject _pieceToCreate;
         private Shader _basePieceShader;
         private GameConfig _gameConfig;
         private PoolConfig _poolConfig;
-        private bool _addedPiece;
+        private Material _tempMaterial;
 
 
         private bool DrawCell(Rect rect, bool value)
@@ -101,7 +102,7 @@ namespace Editor
             int index = existingEnums
                 .FindLastIndex(line => !line.Contains("}"));
 
-            existingEnums.Insert(index, $"{_newPieceEnum},");
+            existingEnums.Insert(index + 1, $"{_newPieceEnum} = {EditorPrefHelper.GetNewTypeNumber()},");
             File.WriteAllLines(PieceTypesEnumFilePath, existingEnums);
 
             EditorPrefHelper.SetNewPieceType(_newPieceEnum);
@@ -137,27 +138,27 @@ namespace Editor
 
         private void LoadPiece()
         {
-            if (pieceToEdit == null)
+            if (PieceToEdit == null)
             {
                 return;
             }
 
-            var piece = pieceToEdit.GetComponent<Piece>();
+            var piece = PieceToEdit.GetComponent<Piece>();
             if (piece == null)
             {
                 return;
             }
 
-            pieceName = piece.name;
-            pieceType = piece.PieceType;
-            pieceCellSprite = piece.SpriteRenderers[0].sprite;
-            pieceColor = piece.SpriteRenderers[0].color;
+            _pieceName = piece.name;
+            _pieceType = piece.PieceType;
+            _pieceCellSprite = piece.SpriteRenderers[0].sprite;
+            _pieceColor = piece.SpriteRenderers[0].color;
 
-            for (int i = 0; i < customCellDrawings.GetLength(0); i++)
+            for (int i = 0; i < _cellMatrix.GetLength(0); i++)
             {
-                for (int j = 0; j < customCellDrawings.GetLength(1); j++)
+                for (int j = 0; j < _cellMatrix.GetLength(1); j++)
                 {
-                    customCellDrawings[i, j] = false;
+                    _cellMatrix[i, j] = false;
                 }
             }
 
@@ -192,7 +193,7 @@ namespace Editor
                 // Ensure index is valid
                 if (x >= 0 && x < sizeX && y >= 0 && y < sizeY)
                 {
-                    customCellDrawings[x, sizeY - y - 1] = true;
+                    _cellMatrix[x, sizeY - y - 1] = true;
                 }
             }
         }
@@ -204,7 +205,6 @@ namespace Editor
             _basePiece = AssetDatabase.LoadAssetAtPath<GameObject>($"{PiecePath}/{PieceBaseName}.prefab");
             _pieceToCreate = PrefabUtility.InstantiatePrefab(_basePiece) as GameObject;
             _basePieceShader = AssetDatabase.LoadAssetAtPath<Shader>(ShaderPath);
-            _addedPiece = false;
 
             tetrisEditor.OnClose -= OnWindowClosed;
             tetrisEditor.OnClose += OnWindowClosed;
@@ -218,89 +218,137 @@ namespace Editor
         [Button, BoxGroup("Create New Piece")]
         public void CreatePiece()
         {
+            if (!ReadyToCreatePiece()) return;
+            if (SameTypePieceExists())
+            {
+                if (ShouldOverwritePiece()) return;
+                RaiseWarning("Piece with same type already exists!");
+                return;
+            }
+
+            var positions = Utils.GetOccupiedCellPositions(_cellMatrix);
+
+            SetPieceMaterial();
+
+            var spriteRenderers = CreatePieceCells(positions);
+            var colliders = AddCollidersToPieceCells(spriteRenderers);
+
+            SetPieceReferences(colliders, spriteRenderers);
+
+            SavePiecePrefab();
+
+            AddNewPieceToPoolConfig(_pieceToCreate.GetComponent<Piece>());
+        }
+
+        private bool ReadyToCreatePiece()
+        {
             if (_pieceToCreate == null || _basePiece == null)
             {
                 Initialize();
+                return false;
             }
 
-            if (SameTypePieceExists())
+            if (_pieceCellSprite == null)
             {
-                if (pieceToEdit != null)
-                {
-                    if (!RaiseWarning("Would you like to overwrite the existing piece?"))
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    RaiseWarning("Piece with same type already exists!");
-                    return;
-                }
+                RaiseWarning("You haven't selected a piece cell sprite!");
+                return false;
             }
 
-            _addedPiece = true;
+            return true;
+        }
 
-            var positions = Enumerable.Range(0, customCellDrawings.GetLength(0))
-                .SelectMany(i => Enumerable.Range(0, customCellDrawings.GetLength(1))
-                    .Where(j => customCellDrawings[i, j])
-                    .Select(j => new Vector2Int(i, j)))
-                .ToList();
+        private bool ShouldOverwritePiece()
+        {
+            if (PieceToEdit == null) return false;
 
-            var middleX = (int)positions.Average(i => i.x);
-            var middleY = (int)positions.Average(i => i.y);
+            if (!RaiseWarning("Would you like to overwrite the existing piece?"))
+            {
+                return true;
+            }
 
-            var averagePosition = new Vector2Int(middleX, middleY);
+            return false;
+        }
 
-            var pieceComponent = _pieceToCreate.GetComponent<Piece>();
-            var colliders = new Collider2D[positions.Count];
-            var spriteRenderers = new SpriteRenderer[positions.Count];
-            var tempMaterial = new Material(_basePieceShader);
+        private void SetPieceMaterial()
+        {
+            var targetOutlineColor = GetTargetOutlineColor();
+            var tempMaterial = CreateNewMaterial();
 
-            AssetDatabase.CreateAsset(tempMaterial, $"{MaterialPath}{pieceName}.mat");
+            tempMaterial.SetColor("_SolidOutline", targetOutlineColor);
+
+            AssetDatabase.CreateAsset(tempMaterial, $"{MaterialPath}{_pieceName}.mat");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
 
-            var targetOutlineColor = pieceColor;
+        private Color GetTargetOutlineColor()
+        {
+            var targetOutlineColor = _pieceColor;
             targetOutlineColor.r -= 40 / 255f;
             targetOutlineColor.g -= 40 / 255f;
             targetOutlineColor.b -= 40 / 255f;
 
-            tempMaterial.SetColor("_SolidOutline", targetOutlineColor);
+            return targetOutlineColor;
+        }
+
+        private Material CreateNewMaterial()
+        {
+            _tempMaterial = new Material(_basePieceShader);
+            return _tempMaterial;
+        }
+
+        private SpriteRenderer[] CreatePieceCells(List<Vector2Int> positions)
+        {
+            var spriteRenderers = new SpriteRenderer[positions.Count];
 
             for (var i = 0; i < positions.Count; i++)
             {
                 var cellPosition = positions[i];
                 var go = new GameObject { name = "PieceCell" };
                 var spriteRenderer = go.AddComponent<SpriteRenderer>();
-                spriteRenderer.sprite = pieceCellSprite;
-                spriteRenderer.color = pieceColor;
-                spriteRenderer.material = tempMaterial;
+                spriteRenderer.sprite = _pieceCellSprite;
+                spriteRenderer.color = _pieceColor;
+                spriteRenderer.material = _tempMaterial;
                 spriteRenderers[i] = spriteRenderer;
-                var collider = go.AddComponent<BoxCollider2D>();
-                colliders[i] = collider;
                 go.transform.SetParent(_pieceToCreate.transform);
-                var targetPosition = averagePosition - cellPosition;
+                var targetPosition = Utils.GetPivotPosition(positions, cellPosition);
                 go.transform.localPosition = new Vector3(-targetPosition.x, targetPosition.y, 0);
             }
 
-            pieceComponent.SetReferencesFromEditor(colliders, spriteRenderers, pieceType);
-            PrefabUtility.RecordPrefabInstancePropertyModifications(_pieceToCreate);
+            return spriteRenderers;
+        }
 
+
+        private Collider2D[] AddCollidersToPieceCells(SpriteRenderer[] spriteRenderers)
+        {
+            var colliders = new Collider2D[spriteRenderers.Length];
+
+            for (var i = 0; i < spriteRenderers.Length; i++)
+            {
+                var collider = spriteRenderers[i].gameObject.AddComponent<BoxCollider2D>();
+                colliders[i] = collider;
+            }
+
+            return colliders;
+        }
+
+        private void SetPieceReferences(Collider2D[] colliders, SpriteRenderer[] spriteRenderers)
+        {
+            var pieceComponent = _pieceToCreate.GetComponent<Piece>();
+            pieceComponent.SetReferencesFromEditor(colliders, spriteRenderers, _pieceType);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(_pieceToCreate);
+        }
+
+        private void SavePiecePrefab()
+        {
             var savedPrefab =
-                PrefabUtility.SaveAsPrefabAsset(_pieceToCreate, $"{PiecePath}/{pieceName}.prefab");
+                PrefabUtility.SaveAsPrefabAsset(_pieceToCreate, $"{PiecePath}/{_pieceName}.prefab");
 
             EditorGUIUtility.PingObject(savedPrefab);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
-            AddNewPieceToPoolConfig(savedPrefab.GetComponent<Piece>());
-
-            foreach (var spriteRenderer in spriteRenderers)
-            {
-                // DestroyImmediate(spriteRenderer.gameObject);
-            }
         }
+
 
         protected override void OnDestroy()
         {
@@ -319,7 +367,7 @@ namespace Editor
 
             foreach (var existingPiece in existingPieces)
             {
-                if (existingPiece.PieceType == pieceType)
+                if (existingPiece.PieceType == _pieceType)
                 {
                     return true;
                 }

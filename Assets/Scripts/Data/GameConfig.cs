@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Enums;
 using Game;
 using Sirenix.OdinInspector;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace Data
@@ -17,11 +21,7 @@ namespace Data
         [Button, BoxGroup("Piece Weights")]
         private void ResetDictionary()
         {
-            var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(piece => piece != null)
-                .Select(piece => piece.GetComponent<Piece>())
-                .Where(pieceComponent => pieceComponent != null);
+            var existingPieces = Utils.GetSavedPieces();
 
             pieceWeightsDictionary = new PieceWeightsDictionary();
 
@@ -60,5 +60,45 @@ namespace Data
         private CameraConfig _cameraConfig;
 
         public CameraConfig CameraConfig => _cameraConfig;
+
+
+#if UNITY_EDITOR
+
+        [Button]
+        public void Set()
+        {
+            EditorPrefHelper.SetLastAmountOfPieceTypes(pieceWeightsDictionary.Count);
+        }
+
+        [DidReloadScripts]
+        private static void CheckPieceTypesChanged()
+        {
+            var lastAmountOfPieces = EditorPrefHelper.GetLastAmountOfPieceTypes();
+            var currentPieceTypes = Enum.GetValues(typeof(PieceType));
+            if (currentPieceTypes.Length < lastAmountOfPieces)
+            {
+                EditorPrefHelper.SetLastAmountOfPieceTypes(Enum.GetValues(typeof(PieceType)).Length);
+
+                var gameConfig = Resources.Load<GameConfig>("GameConfig");
+
+                List<PieceType> _pieceTypesToRemove = new List<PieceType>();
+
+                foreach (var pieceType in gameConfig.pieceWeightsDictionary.Keys)
+                {
+                    if (!Enum.IsDefined(typeof(PieceType), pieceType))
+                    {
+                        _pieceTypesToRemove.Add(pieceType);
+                    }
+                }
+
+                foreach (var pieceType in _pieceTypesToRemove)
+                {
+                    gameConfig.pieceWeightsDictionary.Remove(pieceType);
+                }
+
+                EditorUtility.SetDirty(gameConfig);
+            }
+        }
+#endif
     }
 }

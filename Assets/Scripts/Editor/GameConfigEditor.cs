@@ -11,6 +11,7 @@ namespace Editor
         private const string GameConfigFilePath = "GameConfig";
 
         // [OnValueChanged("OnConfigChanged")]
+        [SerializeField]
         private GameConfig _gameConfig;
 
         [HideLabel]

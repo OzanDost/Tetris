@@ -8,6 +8,7 @@ namespace Editor
     public class TetrisEditor : OdinMenuEditorWindow
     {
         private static PieceCreator _pieceCreator;
+        private static PieceEditor _pieceEditor;
         private static PoolConfigEditor _poolConfigEditor;
         private static GameConfigEditor _gameConfigEditor;
 
@@ -30,20 +31,28 @@ namespace Editor
 
             _pieceCreator.Init(this);
             tree.Add("Piece Creator", _pieceCreator);
-            
+
+            if (_pieceEditor == null)
+            {
+                _pieceEditor = CreateInstance<PieceEditor>();
+            }
+
+            _pieceEditor.Init();
+            tree.Add("Piece Editor", _pieceEditor);
+
             if (_poolConfigEditor == null)
             {
                 _poolConfigEditor = CreateInstance<PoolConfigEditor>();
             }
-            
+
             _poolConfigEditor.Init();
             tree.Add("Pool Config Editor", _poolConfigEditor);
-            
+
             if (_gameConfigEditor == null)
             {
                 _gameConfigEditor = CreateInstance<GameConfigEditor>();
             }
-            
+
             _gameConfigEditor.Init();
             tree.Add("Game Config Editor", _gameConfigEditor);
 
