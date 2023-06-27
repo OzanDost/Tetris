@@ -27,5 +27,3 @@ MonoBehaviour:
     InitialGenerationCount: 50
   - Piece: {fileID: 4394803589209074029, guid: 92667fa0706274615b16fe018dd05737, type: 3}
     InitialGenerationCount: 50
-  - Piece: {fileID: 0}
-    InitialGenerationCount: 50

@@ -24,13 +24,6 @@ namespace Editor
         private const string PoolConfigFilePath = "PoolConfig";
         private const string GameConfigFilePath = "GameConfig";
 
-
-        [PreviewField(100, ObjectFieldAlignment.Left), AssetsOnly,
-         AssetSelector(Paths = "Assets/Prefabs/Game/Pieces"), BoxGroup("Edit Piece")]
-        [OnValueChanged("OnPieceToEditChanged")]
-        [InfoBox("Select a piece to edit, you can edit it or save it as a new piece by changing it's name and type.")]
-        public GameObject PieceToEdit;
-
         [SerializeField, BoxGroup("Create New Piece Type")]
         private string _newPieceEnum;
 
@@ -131,72 +124,6 @@ namespace Editor
             }
         }
 
-        private void OnPieceToEditChanged()
-        {
-            LoadPiece();
-        }
-
-        private void LoadPiece()
-        {
-            if (PieceToEdit == null)
-            {
-                return;
-            }
-
-            var piece = PieceToEdit.GetComponent<Piece>();
-            if (piece == null)
-            {
-                return;
-            }
-
-            _pieceName = piece.name;
-            _pieceType = piece.PieceType;
-            _pieceCellSprite = piece.SpriteRenderers[0].sprite;
-            _pieceColor = piece.SpriteRenderers[0].color;
-
-            for (int i = 0; i < _cellMatrix.GetLength(0); i++)
-            {
-                for (int j = 0; j < _cellMatrix.GetLength(1); j++)
-                {
-                    _cellMatrix[i, j] = false;
-                }
-            }
-
-
-            float minY = float.MaxValue;
-            float minX = float.MaxValue;
-            float maxY = float.MinValue;
-            float maxX = float.MinValue;
-
-            // Calculate Min and Max positions
-            foreach (var pieceCollider in piece.Colliders)
-            {
-                Vector3 localPosition = pieceCollider.transform.localPosition;
-                minY = Mathf.Min(minY, localPosition.y);
-                minX = Mathf.Min(minX, localPosition.x);
-                maxY = Mathf.Max(maxY, localPosition.y);
-                maxX = Mathf.Max(maxX, localPosition.x);
-            }
-
-            float offsetX = (minX);
-            float offsetY = minY;
-            int sizeX = Mathf.RoundToInt(maxX - minX) + 1;
-            int sizeY = Mathf.RoundToInt(maxY - minY) + 1;
-
-            // Normalize the piece positions by considering min values as offsets
-            foreach (var pieceCollider in piece.Colliders)
-            {
-                Vector3 localPosition = pieceCollider.transform.localPosition;
-                int x = Mathf.RoundToInt(localPosition.x - offsetX);
-                int y = Mathf.RoundToInt(localPosition.y - offsetY);
-
-                // Ensure index is valid
-                if (x >= 0 && x < sizeX && y >= 0 && y < sizeY)
-                {
-                    _cellMatrix[x, sizeY - y - 1] = true;
-                }
-            }
-        }
 
         public void Init(TetrisEditor tetrisEditor)
         {
@@ -221,7 +148,6 @@ namespace Editor
             if (!ReadyToCreatePiece()) return;
             if (SameTypePieceExists())
             {
-                if (ShouldOverwritePiece()) return;
                 RaiseWarning("Piece with same type already exists!");
                 return;
             }
@@ -255,18 +181,6 @@ namespace Editor
             }
 
             return true;
-        }
-
-        private bool ShouldOverwritePiece()
-        {
-            if (PieceToEdit == null) return false;
-
-            if (!RaiseWarning("Would you like to overwrite the existing piece?"))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private void SetPieceMaterial()
