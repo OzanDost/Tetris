@@ -4,6 +4,7 @@ using Data;
 using DG.Tweening;
 using Enums;
 using Game.Managers;
+using Lofelt.NiceVibrations;
 using ThirdParty;
 using UnityEngine;
 
@@ -209,6 +210,8 @@ namespace Game
             Signals.Get<PiecePlaced>().Dispatch(CurrentPiece);
 
             ActivatePiece();
+            
+            HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
         }
 
         private void OnLevelFinished(bool isSuccess)
