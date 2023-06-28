@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Enums;
 using Game.Managers;
 using ThirdParty;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Game
 {
@@ -11,6 +15,12 @@ namespace Game
         private Vector2 _randomDirection;
 
         [SerializeField] private float _actionInterval = 1f;
+
+        public override void Initialize()
+        {
+            gameObject.SetActive(true);
+            base.Initialize();
+        }
 
         protected override void SubscribeToEvents()
         {
@@ -52,6 +62,64 @@ namespace Game
             }
         }
 
+        protected override void PieceStateChanged(PieceState oldState, PieceState newState)
+        {
+            CurrentPiece.PieceStateChanged -= PieceStateChanged;
+
+            if (oldState == PieceState.Active && newState == PieceState.Placed)
+            {
+                OnPiecePlaced();
+                GetHeight();
+            }
+        }
+
+        private Bounds _bounds;
+
+        private float GetHeight()
+        {
+            if (!IsActive) return 0f;
+            var isFirstPlacedPieceFound = false;
+            var bounds = new Bounds();
+
+            for (int i = 0; i < CurrentPieceIndex; i++)
+            {
+                if (Pieces[i].State != PieceState.Placed) continue;
+
+                if (!isFirstPlacedPieceFound)
+                {
+                    bounds = new Bounds(Pieces[i].Colliders[0].bounds.center, Pieces[i].Colliders[0].bounds.size);
+                    isFirstPlacedPieceFound = true;
+                    continue;
+                }
+
+                foreach (var pieceCollider in Pieces[i].Colliders)
+                {
+                    bounds.Encapsulate(pieceCollider.bounds);
+                }
+            }
+
+            _bounds.size = bounds.size;
+            _bounds.center = bounds.center;
+
+            Signals.Get<AIBoardHeightChanged>().Dispatch(bounds.size.y);
+
+            return bounds.size.y;
+        }
+
+        protected override void ArrangeBoard(bool shouldSendEvent)
+        {
+            var groundPosition = Ground.transform.localPosition;
+            FallZone.transform.localPosition = groundPosition - new Vector3(0, 5f, 0);
+            StageFinishLine.SetLocalHeight(groundPosition.y + ConfigHelper.Config.WinLoseConditionConfig.TargetHeight);
+            PieceSpawnPoint.localPosition = StageFinishLine.transform.localPosition + Vector3.up * 5f;
+
+            if (shouldSendEvent)
+            {
+                Signals.Get<AIBoardArranged>().Dispatch(Ground.HorizontalBounds,
+                    StageFinishLine.HorizontalBounds, PieceSpawnPoint);
+            }
+        }
+
         protected override void OnPieceFellOffBoard(Collider2D pieceCollider)
         {
             var fallenPiece = GetPieceFromCollider(pieceCollider, out bool foundPiece);
@@ -62,6 +130,7 @@ namespace Game
 
             MistakeCount++;
 
+            GetHeight();
             CheckMistakes(fallenPiece.State == PieceState.Placed);
             PoolManager.Instance.ReturnPiece(fallenPiece);
         }

@@ -27,7 +27,7 @@ namespace Game
         public event Action<PieceState, PieceState> PieceStateChanged;
         public bool IsInPool { get; set; }
 
-        private void SetBounds()
+        public void SetBounds()
         {
             var bounds = new Bounds(transform.position, Vector3.zero);
             foreach (var pieceCollider in _colliders)

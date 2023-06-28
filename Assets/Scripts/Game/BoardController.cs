@@ -29,16 +29,17 @@ namespace Game
         [SerializeField] protected Transform PieceSpawnPoint;
         [SerializeField] protected StageFinishLine StageFinishLine;
         [SerializeField] protected FallZone FallZone;
+        [SerializeField] protected Ground Ground;
         [SerializeField] private BoxCollider2D _pieceConfiner;
-        [SerializeField] private Ground _ground;
 
 
-        public void Initialize()
+        public virtual void Initialize()
         {
             SubscribeToEvents();
 
             Pieces = new List<Piece>(50);
             CurrentPieceIndex = 0;
+            MistakeCount = 0;
             _gameConfig = ConfigHelper.Config;
 
             GeneratePieces();
@@ -87,16 +88,16 @@ namespace Game
             UnsubscribeFromEvents();
         }
 
-        private void ArrangeBoard(bool shouldSendEvent)
+        protected virtual void ArrangeBoard(bool shouldSendEvent)
         {
-            var groundPosition = _ground.transform.localPosition;
+            var groundPosition = Ground.transform.localPosition;
             FallZone.transform.localPosition = groundPosition - new Vector3(0, 5f, 0);
             StageFinishLine.SetLocalHeight(groundPosition.y + ConfigHelper.Config.WinLoseConditionConfig.TargetHeight);
             PieceSpawnPoint.localPosition = StageFinishLine.transform.localPosition + Vector3.up * 5f;
 
             if (shouldSendEvent)
             {
-                Signals.Get<BoardArranged>().Dispatch(_ground.HorizontalBounds,
+                Signals.Get<BoardArranged>().Dispatch(Ground.HorizontalBounds,
                     StageFinishLine.HorizontalBounds, PieceSpawnPoint);
             }
         }
@@ -187,7 +188,7 @@ namespace Game
             });
         }
 
-        protected void PieceStateChanged(PieceState oldState, PieceState newState)
+        protected virtual void PieceStateChanged(PieceState oldState, PieceState newState)
         {
             CurrentPiece.PieceStateChanged -= PieceStateChanged;
 
@@ -197,7 +198,7 @@ namespace Game
             }
         }
 
-        private void OnPiecePlaced()
+        protected virtual void OnPiecePlaced()
         {
             if (!IsActive) return;
             if (CurrentPieceIndex + 1 >= Pieces.Count)
@@ -298,7 +299,7 @@ namespace Game
         }
 
 
-        private void GeneratePieces(int amount = -1)
+        protected void GeneratePieces(int amount = -1)
         {
             int piecesToGenerate = amount == -1 ? 250 : amount;
             for (int i = 0; i < piecesToGenerate; i++)

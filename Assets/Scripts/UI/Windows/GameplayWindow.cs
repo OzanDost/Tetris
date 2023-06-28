@@ -1,6 +1,7 @@
 using ThirdParty;
 using ThirdParty.uiframework.Window;
 using TMPro;
+using UI.Widgets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ namespace UI.Windows
         [SerializeField] private Button _freezeButton;
         [SerializeField] private TextMeshProUGUI _manaText;
         [SerializeField] private TextMeshProUGUI _scoreText;
+        [SerializeField] private OpponentWidget _opponentWidget;
 
         private int _currentLiveIndex;
 
@@ -26,7 +28,7 @@ namespace UI.Windows
 
             Signals.Get<LifeLost>().AddListener(OnLifeLost);
         }
-
+        
         protected override void On_UIOPen()
         {
             base.On_UIOPen();

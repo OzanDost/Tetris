@@ -20,7 +20,6 @@ namespace Game
         {
             Signals.Get<BoardArranged>().AddListener(OnBoardArranged);
             Signals.Get<GameStateChanged>().AddListener(OnGameStateChanged);
-            Signals.Get<AIMistakesFilled>().AddListener(OnAiMistakesFilled);
             Signals.Get<CurrentPieceChanged>().AddListener(OnCurrentPieceChanged);
             _targets = new List<List<Transform>>(2);
         }
@@ -33,13 +32,6 @@ namespace Game
         private void ShakeCamera()
         {
             _impulseSource.GenerateImpulse(0.1f);
-        }
-
-        private void OnAiMistakesFilled()
-        {
-            //remove last 3 elements
-            _targets.RemoveRange(_targets.Count - 3, 3);
-            CreateViewBox();
         }
 
         private void OnGameStateChanged(GameState oldState, GameState newState)
@@ -94,7 +86,6 @@ namespace Game
                 ? targetBounds.size.x * Screen.height / Screen.width * 0.5f
                 : targetBounds.size.y * 0.5f;
 
-            // Add padding
             orthographicSize *= paddingFactor;
 
             _virtualCamera.m_Lens.OrthographicSize = orthographicSize;

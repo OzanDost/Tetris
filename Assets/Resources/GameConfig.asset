@@ -22,7 +22,7 @@ MonoBehaviour:
     _verticalFastMoveSpeed: 2
   _winLoseConditionConfig:
     _allowedMistakeCount: 5
-    _targetHeight: 40
+    _targetHeight: 25
   _distanceBetweenBoards: 5
   _cameraConfig:
     _additionalVerticalOffsetSingleMode: 2.5

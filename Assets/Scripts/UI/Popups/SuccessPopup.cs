@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace UI.Popups
 {
-    public class SuccessPopup : AWindowController<SuccessWindowProperties>
+    public class SuccessPopup : AWindowController
     {
         [SerializeField] private Button continueButton;
         [SerializeField] private TextMeshProUGUI scoreText;
@@ -51,9 +51,7 @@ namespace UI.Popups
             base.On_UIOPen();
             leftParticle.Play();
             rightParticle.Play();
-
-            durationText.text = $"Duration: {Properties.duration}";
-
+            
             foreach (var star in stars)
             {
                 star.gameObject.SetActive(false);
@@ -66,9 +64,9 @@ namespace UI.Popups
                     .OnStart(() => star.gameObject.SetActive(true)));
             }
 
-            int startNumber = 0;
+            float startNumber = 0;
 
-            _scoreTween = DOTween.To(() => startNumber, x => startNumber = x, Properties.score, 2f)
+            _scoreTween = DOTween.To(() => startNumber, x => startNumber = x, _targetScore, 2f)
                 .SetEase(Ease.InOutExpo)
                 .OnUpdate(() => { scoreText.SetText($"Score: {startNumber}"); });
 
@@ -87,19 +85,6 @@ namespace UI.Popups
         {
             // Signals.Get<MainMenuRequested>().Dispatch();
             Signals.Get<LevelQuit>().Dispatch();
-        }
-    }
-
-    [Serializable]
-    public class SuccessWindowProperties : WindowProperties
-    {
-        public string duration;
-        public int score;
-
-        public SuccessWindowProperties(string duration, int score)
-        {
-            this.duration = duration;
-            this.score = score;
         }
     }
 }
