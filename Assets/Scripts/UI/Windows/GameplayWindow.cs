@@ -1,7 +1,5 @@
 using ThirdParty;
 using ThirdParty.uiframework.Window;
-using TMPro;
-using UI.Widgets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,11 +9,6 @@ namespace UI.Windows
     {
         [SerializeField] private Image[] _lives;
         [SerializeField] private Button _pauseButton;
-        [SerializeField] private Button _lightningButton;
-        [SerializeField] private Button _freezeButton;
-        [SerializeField] private TextMeshProUGUI _manaText;
-        [SerializeField] private TextMeshProUGUI _scoreText;
-        [SerializeField] private OpponentWidget _opponentWidget;
 
         private int _currentLiveIndex;
 
@@ -23,8 +16,6 @@ namespace UI.Windows
         {
             base.Awake();
             _pauseButton.onClick.AddListener(OnPauseButtonClicked);
-            _lightningButton.onClick.AddListener(OnLightningButtonClicked);
-            _freezeButton.onClick.AddListener(OnFreezeButtonClicked);
 
             Signals.Get<LifeLost>().AddListener(OnLifeLost);
         }
@@ -37,7 +28,6 @@ namespace UI.Windows
 
         private void OnLifeLost()
         {
-            //todo close one of the hearts and show a cross mark at the bottom of the screen
             if (_currentLiveIndex >= _lives.Length)
                 return;
 
@@ -48,16 +38,7 @@ namespace UI.Windows
                 _lives[i].gameObject.SetActive(false);
             }
         }
-
-        private void OnLightningButtonClicked()
-        {
-            //todo 
-        }
-
-        private void OnFreezeButtonClicked()
-        {
-        }
-
+        
         private void OnPauseButtonClicked()
         {
             Signals.Get<TogglePause>().Dispatch(true);
