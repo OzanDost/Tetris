@@ -277,7 +277,11 @@ namespace Editor
 
         private bool SameTypePieceExists()
         {
-            var existingPieces = Utils.GetSavedPieces();
+            var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(piece => piece != null)
+                .Select(piece => piece.GetComponent<Piece>())
+                .Where(pieceComponent => pieceComponent != null);
 
             foreach (var existingPiece in existingPieces)
             {

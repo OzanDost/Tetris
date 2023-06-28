@@ -77,12 +77,12 @@ namespace Game
             var currentInputPos = InputManager.GetMousePosition();
             var delta = currentInputPos - _inputStartPos;
 
-            if (Mathf.Abs(delta.y) > 10f)
+            if (Mathf.Abs(delta.y) > 60f)
             {
                 _verticalSpeedSignal.Dispatch(true);
                 _pieceMoved = true;
             }
-            else if (Mathf.Abs(delta.x) > 15f)
+            else if (Mathf.Abs(delta.x) > 40f)
             {
                 _horizontalInputSignal.Dispatch(delta.normalized.x);
                 _inputStartPos = currentInputPos;

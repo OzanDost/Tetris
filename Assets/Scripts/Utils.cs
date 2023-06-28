@@ -11,17 +11,6 @@ public static class Utils
         return (int)Mathf.Log(layerMask, 2);
     }
 
-    public static IEnumerable<Piece> GetSavedPieces()
-    {
-        var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
-            .Select(guid => AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)))
-            .Where(piece => piece != null)
-            .Select(piece => piece.GetComponent<Piece>())
-            .Where(pieceComponent => pieceComponent != null);
-
-        return existingPieces;
-    }
-
     public static List<Vector2Int> GetOccupiedCellPositions(bool[,] matrix)
     {
         return Enumerable.Range(0, matrix.GetLength(0))
