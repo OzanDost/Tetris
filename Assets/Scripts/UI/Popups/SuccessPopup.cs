@@ -1,6 +1,3 @@
-using System;
-using System.Text;
-using Coffee.UIExtensions;
 using DG.Tweening;
 using ThirdParty;
 using ThirdParty.uiframework.Window;
@@ -14,11 +11,7 @@ namespace UI.Popups
     {
         [SerializeField] private Button continueButton;
         [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private TextMeshProUGUI durationText;
-
-        [SerializeField] private UIParticle leftParticle;
-        [SerializeField] private UIParticle rightParticle;
-
+        
         [SerializeField] private RectTransform[] stars;
 
         private Tween _scoreTween;
@@ -49,9 +42,7 @@ namespace UI.Popups
         protected override void On_UIOPen()
         {
             base.On_UIOPen();
-            leftParticle.Play();
-            rightParticle.Play();
-            
+
             foreach (var star in stars)
             {
                 star.gameObject.SetActive(false);
@@ -83,7 +74,6 @@ namespace UI.Popups
 
         private void OnContinueButtonClicked()
         {
-            // Signals.Get<MainMenuRequested>().Dispatch();
             Signals.Get<LevelQuit>().Dispatch();
         }
     }

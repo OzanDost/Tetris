@@ -29,7 +29,7 @@ namespace Editor
                 _pieceCreator = CreateInstance<PieceCreator>();
             }
 
-            _pieceCreator.Init(this);
+            // _pieceCreator.Init(this);
             tree.Add("Piece Creator", _pieceCreator);
 
             if (_pieceEditor == null)
@@ -72,7 +72,7 @@ namespace Editor
                     {
                         if (SirenixEditorGUI.ToolbarButton("Re-Init Piece Creator"))
                         {
-                            _pieceCreator.Init(this);
+                            // _pieceCreator.Init(this);
                         }
                     }
                 }

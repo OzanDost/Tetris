@@ -9,6 +9,5 @@ namespace Enums
         TShape = 4,
         ZShape = 5,
         SShape = 6,
-test = 12,
     }
 }

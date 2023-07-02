@@ -65,10 +65,10 @@ namespace Editor
             _gameConfig.DistanceBetweenBoards = _distanceBetweenBoards;
             EditorUtility.SetDirty(_gameConfig);
         }
+
         [Button, BoxGroup("Piece Weights")]
         private void ResetDictionary()
         {
-            
             var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
                 .Select(guid => AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(piece => piece != null)

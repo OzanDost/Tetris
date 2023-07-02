@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Game;
-using UnityEditor;
 using UnityEngine;
 
 public static class Utils
@@ -16,7 +14,7 @@ public static class Utils
         return Enumerable.Range(0, matrix.GetLength(0))
             .SelectMany(i => Enumerable.Range(0, matrix.GetLength(1))
                 .Where(j => matrix[i, j])
-                .Select(j => new Vector2Int(i, j)))
+                .Select(j => new Vector2Int(j, i)))
             .ToList();
     }
 

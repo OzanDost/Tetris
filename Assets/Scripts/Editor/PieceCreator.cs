@@ -5,16 +5,13 @@ using Data;
 using DefaultNamespace.Data;
 using Enums;
 using Game;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace Editor
 {
-    public class PieceCreator : OdinEditorWindow
+    public class PieceCreator : EditorWindow
     {
         private const string PiecePath = "Assets/Prefabs/Game/Pieces";
         private const string ShaderPath = "Assets/Shaders/SpriteOutline.shader";
@@ -24,31 +21,12 @@ namespace Editor
         private const string PoolConfigFilePath = "PoolConfig";
         private const string GameConfigFilePath = "GameConfig";
 
-        [SerializeField, BoxGroup("Create New Piece Type")]
         private string _newPieceEnum;
-
-        [SerializeField, BoxGroup("Create New Piece")]
         private string _pieceName;
-
-        [SerializeField, BoxGroup("Create New Piece")]
         private PieceType _pieceType;
-
-        [SerializeField, BoxGroup("Create New Piece")]
-        [AssetSelector(Paths = "Assets/Sprites/Game/PieceCells")]
-        [ShowInInspector]
         private Sprite _pieceCellSprite;
-
-        [SerializeField, BoxGroup("Create New Piece")]
-        [ColorPalette]
-        [ShowInInspector]
         private Color _pieceColor;
-
-        [SerializeField, BoxGroup("Create New Piece")]
-        [PropertySpace(spaceBefore: 10)]
-        [TableMatrix(DrawElementMethod = nameof(DrawCell), SquareCells = true, ResizableColumns = false,
-            HideColumnIndices = true, HideRowIndices = true)]
-        [ShowInInspector]
-        private bool[,] _cellMatrix = new bool[4, 4];
+        private readonly bool[,] _cellMatrix = new bool[4, 4];
 
         private GameObject _basePiece;
         private GameObject _pieceToCreate;
@@ -56,21 +34,8 @@ namespace Editor
         private GameConfig _gameConfig;
         private PoolConfig _poolConfig;
         private Material _tempMaterial;
+        private bool _isInitialized;
 
-
-        private bool DrawCell(Rect rect, bool value)
-        {
-            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
-            {
-                value = !value;
-                GUI.changed = true;
-                Event.current.Use();
-            }
-
-            var color = value ? Color.black : Color.white;
-            EditorGUI.DrawRect(rect.Padding(1), color);
-            return value;
-        }
 
         private void ClearPiecesInScene()
         {
@@ -81,16 +46,9 @@ namespace Editor
             }
         }
 
-        [Button, BoxGroup("Create New Piece Type")]
         private void AddPieceType()
         {
             var existingEnums = File.ReadAllLines(PieceTypesEnumFilePath).ToList();
-
-            if (existingEnums.Exists(existingEnum => existingEnum.Contains(_newPieceEnum)))
-            {
-                RaiseWarning("Piece type already exists!");
-                return;
-            }
 
             int index = existingEnums
                 .FindLastIndex(line => !line.Contains("}"));
@@ -125,7 +83,162 @@ namespace Editor
         }
 
 
-        public void Init(TetrisEditor tetrisEditor)
+        [MenuItem("Tools/Piece Creator")]
+        public static void ShowWindow()
+        {
+            PieceCreator window = (PieceCreator)GetWindow(typeof(PieceCreator));
+            window.Show();
+        }
+
+
+        private bool CanValidateNewEnum()
+        {
+            if (SameTypePieceExists(_newPieceEnum))
+            {
+                RaiseWarning("Piece type already exists!");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(_newPieceEnum) || _newPieceEnum.Length < 3)
+            {
+                RaiseWarning("New PieceType enum should be at least 3 characters long!");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool CanValidateNewPiece()
+        {
+            if (_pieceCellSprite == null)
+            {
+                RaiseWarning("You haven't selected a piece cell sprite!");
+                return false;
+            }
+
+            if (SameTypePieceExists())
+            {
+                RaiseWarning("Piece with same type already exists!");
+                return false;
+            }
+
+            return true;
+        }
+
+
+        private void OnGUI()
+        {
+            if (!_isInitialized || _pieceToCreate == null)
+            {
+                Init();
+            }
+
+            GUILayout.Space(10); // Add some space between the two boxes
+
+            DrawNewPieceType();
+
+            GUILayout.Space(10); // Add some space between the two boxes
+
+            DrawNewPiece();
+        }
+
+        private void DrawNewPiece()
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical();
+            _pieceName = EditorGUILayout.TextField("Piece Name", _pieceName);
+            _pieceType = (PieceType)EditorGUILayout.EnumPopup("Piece Type", _pieceType);
+            _pieceColor = EditorGUILayout.ColorField("Piece Color", _pieceColor);
+
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
+            _pieceCellSprite = (Sprite)EditorGUILayout.ObjectField(_pieceCellSprite, typeof(Sprite), false,
+                GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true), GUILayout.MaxHeight(85),
+                GUILayout.MaxWidth(85));
+            GUILayout.Label("Piece Cell Sprite");
+
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
+
+
+            DrawCells();
+
+            if (GUILayout.Button("Create Piece"))
+            {
+                CreatePiece();
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        private void DrawNewPieceType()
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+
+            GUILayout.Label("Create New Piece Type", EditorStyles.boldLabel);
+            _newPieceEnum = EditorGUILayout.TextField("New Piece Enum", _newPieceEnum);
+            if (GUILayout.Button("Create Piece Type"))
+            {
+                if (!CanValidateNewEnum()) return;
+
+                AddPieceType();
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        private void DrawCells()
+        {
+            float screenWidth = EditorGUIUtility.currentViewWidth;
+            int cellSize = (int)((screenWidth - 90) / _cellMatrix.GetLength(1));
+
+            EditorGUILayout.BeginVertical();
+
+            GUILayout.Space(10);
+
+            // Iterate through the rows and columns of the matrix.
+            for (int i = 0; i < _cellMatrix.GetLength(0); i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+
+                for (int j = 0; j < _cellMatrix.GetLength(1); j++)
+                {
+                    if (j == 0)
+                    {
+                        GUILayout.FlexibleSpace();
+                    }
+
+                    Rect rect = EditorGUILayout.GetControlRect(GUILayout.Width(cellSize), GUILayout.Height(cellSize));
+
+                    if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
+                    {
+                        _cellMatrix[i, j] = !_cellMatrix[i, j];
+                        Event.current.Use(); // Consume the event so other control does not use it
+                        Repaint(); // Force window redrawing to update the display after changing values
+                    }
+
+
+                    Color color = _cellMatrix[i, j] ? Color.black : Color.white;
+                    EditorGUI.DrawRect(rect, color);
+
+                    if (j == _cellMatrix.GetLength(1) - 1)
+                    {
+                        GUILayout.FlexibleSpace();
+                    }
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(10);
+            EditorGUILayout.EndVertical();
+        }
+
+        private void Init()
         {
             ClearPiecesInScene();
 
@@ -133,22 +246,20 @@ namespace Editor
             _pieceToCreate = PrefabUtility.InstantiatePrefab(_basePiece) as GameObject;
             _basePieceShader = AssetDatabase.LoadAssetAtPath<Shader>(ShaderPath);
 
-            tetrisEditor.OnClose -= OnWindowClosed;
-            tetrisEditor.OnClose += OnWindowClosed;
+            _isInitialized = true;
         }
 
-        private void OnWindowClosed()
+        private void OnDestroy()
         {
             ClearPiecesInScene();
         }
 
-        [Button, BoxGroup("Create New Piece")]
-        public void CreatePiece()
+        private void CreatePiece()
         {
             if (!ReadyToCreatePiece()) return;
-            if (SameTypePieceExists())
+
+            if (!CanValidateNewPiece())
             {
-                RaiseWarning("Piece with same type already exists!");
                 return;
             }
 
@@ -161,22 +272,18 @@ namespace Editor
 
             SetPieceReferences(colliders, spriteRenderers);
 
-            SavePiecePrefab();
+            var savePiecePrefab = SavePiecePrefab();
 
-            AddNewPieceToPoolConfig(_pieceToCreate.GetComponent<Piece>());
+            AddNewPieceToPoolConfig(savePiecePrefab.GetComponent<Piece>());
+
+            ClearPieceComponents();
         }
 
         private bool ReadyToCreatePiece()
         {
             if (_pieceToCreate == null || _basePiece == null)
             {
-                Initialize();
-                return false;
-            }
-
-            if (_pieceCellSprite == null)
-            {
-                RaiseWarning("You haven't selected a piece cell sprite!");
+                Init();
                 return false;
             }
 
@@ -232,6 +339,14 @@ namespace Editor
             return spriteRenderers;
         }
 
+        private void ClearPieceComponents()
+        {
+            var componentCount = _pieceToCreate.transform.childCount;
+            for (int i = 0; i < componentCount; i++)
+            {
+                DestroyImmediate(_pieceToCreate.transform.GetChild(0).gameObject);
+            }
+        }
 
         private Collider2D[] AddCollidersToPieceCells(SpriteRenderer[] spriteRenderers)
         {
@@ -253,7 +368,7 @@ namespace Editor
             PrefabUtility.RecordPrefabInstancePropertyModifications(_pieceToCreate);
         }
 
-        private void SavePiecePrefab()
+        private GameObject SavePiecePrefab()
         {
             var savedPrefab =
                 PrefabUtility.SaveAsPrefabAsset(_pieceToCreate, $"{PiecePath}/{_pieceName}.prefab");
@@ -261,13 +376,8 @@ namespace Editor
             EditorGUIUtility.PingObject(savedPrefab);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-        }
 
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            ClearPiecesInScene();
+            return savedPrefab;
         }
 
         private bool RaiseWarning(string message)
@@ -286,6 +396,26 @@ namespace Editor
             foreach (var existingPiece in existingPieces)
             {
                 if (existingPiece.PieceType == _pieceType)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool SameTypePieceExists(string pieceType)
+        {
+            var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(piece => piece != null)
+                .Select(piece => piece.GetComponent<Piece>())
+                .Where(pieceComponent => pieceComponent != null);
+
+            foreach (var existingPiece in existingPieces)
+            {
+                var enumString = existingPiece.PieceType.ToString();
+                if (enumString.Equals(pieceType))
                 {
                     return true;
                 }
