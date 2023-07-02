@@ -1,67 +1,57 @@
-using System.Collections.Generic;
-using System.Linq;
 using Enums;
 using Game;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor
 {
-    public class PieceEditor : OdinEditorWindow
+    public class PieceEditor : EditorWindow
     {
-        private const string PiecePath = "Assets/Prefabs/Game/Pieces";
+        private const string SearchPattern = "p: t:prefab Assets/Prefabs/Game/Pieces -Piece_Base";
+        
+        private const int MinCellSize = 128;
+        private const int MaxCellSize = 200;
 
-        [AssetSelector(Paths = PiecePath, DisableListAddButtonBehaviour = true)]
         [SerializeField]
-        [OnValueChanged("OnPieceChanged")]
-        [PreviewField(Height = 100, Alignment = ObjectFieldAlignment.Left)]
         private GameObject _pieceToEdit;
 
         private Piece _piece;
-
-        [SerializeField]
-        [ShowIf("@_pieceToEdit != null")]
-        [ReadOnly]
         private PieceType _pieceType;
-
-        [SerializeField]
-        [ShowIf("@_pieceToEdit != null")]
         private string _pieceName;
-
-        [SerializeField]
-        [ShowIf("@_pieceToEdit != null")]
         private Sprite _pieceCellSprite;
-
-        [SerializeField]
-        [ShowIf("@_pieceToEdit != null")]
         private Color _pieceCellColor;
-
-        [InlineEditor]
-        [ShowIf("@_pieceToEdit != null")]
-        [HideLabel]
-        [SerializeField]
-        [ReadOnly]
-        private Material _pieceMaterial;
-
-        [SerializeField]
-        [ShowIf("@_pieceToEdit != null")]
-        [PropertySpace(spaceBefore: 10)]
-        [TableMatrix(DrawElementMethod = nameof(DrawCell), SquareCells = true, ResizableColumns = false,
-            HideColumnIndices = true, HideRowIndices = true, RowHeight = 30)]
-        [ShowInInspector]
-        [ReadOnly]
-        [BoxGroup()]
-        private bool[,] _cellMatrix = new bool[4, 4];
-
+        private readonly bool[,] _cellMatrix = new bool[4, 4];
 
         public void Init()
         {
         }
 
-        [Button]
+        [MenuItem("Tools/Piece Editor")]
+        public static void OpenWindow()
+        {
+            PieceEditor pieceEditor = GetWindow<PieceEditor>();
+            pieceEditor.minSize = new Vector2(800, 1200);
+            pieceEditor.maxSize = new Vector2(800, 1200);
+            pieceEditor.Show();
+        }
+
+        private void OnGUI()
+        {
+            EditorGUILayout.BeginVertical();
+            DrawSelectedPiece();
+
+            DrawPieceFields();
+
+            DrawCells();
+
+            if (GUILayout.Button("Update Piece"))
+            {
+                UpdatePiece();
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
         private void UpdatePiece()
         {
             _pieceToEdit.name = _pieceName;
@@ -80,18 +70,81 @@ namespace Editor
             AssetDatabase.Refresh();
         }
 
+        private void DrawSelectedPiece()
+        {
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.LabelField("Select Piece", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+
+            using (new EditorGUI.DisabledScope(true))
+            {
+                _pieceToEdit = (GameObject)EditorGUILayout.ObjectField(_pieceToEdit, typeof(GameObject), false);
+            }
+
+            if (GUILayout.Button("Select Piece"))
+            {
+                int controlID = GUIUtility.GetControlID(FocusType.Passive);
+                EditorGUIUtility.ShowObjectPicker<GameObject>(_pieceToEdit, false, SearchPattern, controlID);
+            }
+
+            string commandName = Event.current.commandName;
+
+            if (commandName == "ObjectSelectorClosed")
+            {
+                _pieceToEdit = (GameObject)EditorGUIUtility.GetObjectPickerObject();
+                OnPieceChanged();
+            }
+
+
+            EditorGUILayout.EndHorizontal();
+            if (_pieceToEdit == null)
+            {
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            var editor = UnityEditor.Editor.CreateEditor(_pieceToEdit);
+            editor.DrawPreview(GUILayoutUtility.GetRect(256, 256));
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawPieceFields()
+        {
+            GUILayout.BeginHorizontal(new GUIStyle()
+            {
+                border = new RectOffset(10, 10, 10, 10),
+                padding = new RectOffset(10, 10, 10, 10),
+                margin = new RectOffset(10, 10, 10, 10),
+                normal =
+                {
+                    background = Texture2D.grayTexture,
+                }
+            });
+
+            GUILayout.BeginVertical();
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField("Piece Fields", EditorStyles.boldLabel);
+            _pieceName = EditorGUILayout.TextField("Piece Name", _pieceName);
+            _pieceType = (PieceType)EditorGUILayout.EnumPopup("Piece Type", _pieceType);
+            _pieceCellColor = EditorGUILayout.ColorField("Piece Color", _pieceCellColor);
+
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
+            _pieceCellSprite = (Sprite)EditorGUILayout.ObjectField(_pieceCellSprite, typeof(Sprite), false,
+                GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true), GUILayout.MaxHeight(85),
+                GUILayout.MaxWidth(85));
+            GUILayout.Label("Piece Cell Sprite");
+
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
+        }
+
         private void OnPieceChanged()
         {
             if (_pieceToEdit == null) return;
             LoadPiece();
-        }
-
-        private bool DrawCell(Rect rect, bool value)
-        {
-            var color = value ? Color.black : Color.white;
-
-            EditorGUI.DrawRect(rect.Padding(1), color);
-            return value;
         }
 
         private void LoadPiece()
@@ -105,7 +158,7 @@ namespace Editor
 
             _pieceType = _piece.PieceType;
             _pieceName = _piece.name;
-            _pieceMaterial = _piece.SpriteRenderers[0].sharedMaterial;
+            // _pieceMaterial = _piece.SpriteRenderers[0].sharedMaterial;
             _pieceCellColor = _piece.SpriteRenderers[0].color;
             _pieceCellSprite = _piece.SpriteRenderers[0].sprite;
 
@@ -152,6 +205,54 @@ namespace Editor
                     _cellMatrix[x, sizeY - y - 1] = true;
                 }
             }
+        }
+
+        private void DrawCells()
+        {
+            float screenWidth = EditorGUIUtility.currentViewWidth;
+            int cellSize = (int)((screenWidth - 90) / _cellMatrix.GetLength(1));
+            cellSize = Mathf.Clamp(cellSize, MinCellSize, MaxCellSize);
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            GUILayout.Space(10);
+
+            // Iterate through the rows and columns of the matrix.
+            for (int i = 0; i < _cellMatrix.GetLength(0); i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+
+                for (int j = 0; j < _cellMatrix.GetLength(1); j++)
+                {
+                    if (j == 0)
+                    {
+                        GUILayout.FlexibleSpace();
+                    }
+
+                    Rect rect = EditorGUILayout.GetControlRect(GUILayout.Width(cellSize), GUILayout.Height(cellSize));
+
+                    if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
+                    {
+                        _cellMatrix[i, j] = !_cellMatrix[i, j];
+                        Event.current.Use(); // Consume the event so other control does not use it
+                        Repaint(); // Force window redrawing to update the display after changing values
+                    }
+
+
+                    Color color = _cellMatrix[i, j] ? Color.black : Color.white;
+                    EditorGUI.DrawRect(rect, color);
+
+                    if (j == _cellMatrix.GetLength(1) - 1)
+                    {
+                        GUILayout.FlexibleSpace();
+                    }
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(10);
+            EditorGUILayout.EndVertical();
         }
     }
 }

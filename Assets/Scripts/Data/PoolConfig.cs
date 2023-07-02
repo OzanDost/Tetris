@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Data;
 using UnityEngine;
 
-namespace DefaultNamespace.Data
+namespace Data
 {
     [CreateAssetMenu(fileName = "Pool Config", menuName = "Custom/Pool Config", order = 0)]
     public class PoolConfig : ScriptableObject

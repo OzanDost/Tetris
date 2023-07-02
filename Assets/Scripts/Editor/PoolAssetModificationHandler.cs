@@ -1,5 +1,4 @@
 using Data;
-using DefaultNamespace.Data;
 using Game;
 using UnityEditor;
 using UnityEngine;
