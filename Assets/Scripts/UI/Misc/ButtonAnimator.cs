@@ -1,12 +1,10 @@
 using DG.Tweening;
-using Lofelt.NiceVibrations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace UI.Misc
 {
-    public class ButtonAnimator : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler,
-        IPointerClickHandler
+    public class ButtonAnimator : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
         [SerializeField] private float animationSpeed = 3f;
         [SerializeField] private float subtractedScale = 0.1f;
@@ -45,12 +43,6 @@ namespace UI.Misc
             _isPressed = false;
             _animationTween?.Kill();
             _animationTween = transform.DOScale(_defaultScale, animationSpeed).SetSpeedBased().SetEase(Ease.Linear);
-        }
-
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
         }
     }
 }

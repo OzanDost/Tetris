@@ -10,7 +10,6 @@ namespace Editor
     {
         private const string PoolConfigFilePath = "PoolConfig";
 
-
         private PoolConfig _poolConfig;
         private SerializedObject _serializedObject;
         private ReorderableList _reorderableList;
@@ -118,4 +117,6 @@ namespace Editor
             AssetDatabase.SaveAssetIfDirty(_poolConfig);
         }
     }
+    
+    
 }

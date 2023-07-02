@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 080a0181fafb4bff84704a4af1bf5ba5, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  pieceWeightsDictionary:
+  _pieceWeightsDictionary:
     m_keys: 00000000010000000300000002000000060000000400000005000000
     m_values: 01000000010000000100000001000000010000000100000001000000
   _pieceMovementConfig:

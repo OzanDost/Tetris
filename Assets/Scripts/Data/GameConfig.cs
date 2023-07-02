@@ -1,7 +1,3 @@
-using System.Linq;
-using Game;
-using Sirenix.OdinInspector;
-using UnityEditor;
 using UnityEngine;
 
 namespace Data
@@ -11,20 +7,17 @@ namespace Data
     {
         public PieceWeightsDictionary PieceWeightsDictionary
         {
-            get => pieceWeightsDictionary;
-            set => pieceWeightsDictionary = value;
+            get => _pieceWeightsDictionary;
+            set => _pieceWeightsDictionary = value;
         }
 
-        [BoxGroup("Piece Weights")]
-        [SerializeField] private PieceWeightsDictionary pieceWeightsDictionary;
+        [SerializeField] private PieceWeightsDictionary _pieceWeightsDictionary;
 
        
-        [HideLabel]
         [SerializeField] private PieceMovementConfig _pieceMovementConfig;
 
         public PieceMovementConfig PieceMovementConfig => _pieceMovementConfig;
 
-        [HideLabel]
         [SerializeField] private WinLoseConditionConfig _winLoseConditionConfig;
 
         public WinLoseConditionConfig WinLoseConditionConfig => _winLoseConditionConfig;
@@ -41,16 +34,10 @@ namespace Data
 
         #endregion
 
-        [HideLabel]
         [SerializeField]
         private CameraConfig _cameraConfig;
 
         public CameraConfig CameraConfig => _cameraConfig;
-
-
-#if UNITY_EDITOR
-
-
-#endif
     }
+    
 }

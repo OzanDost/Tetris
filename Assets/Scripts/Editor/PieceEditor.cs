@@ -8,7 +8,7 @@ namespace Editor
     public class PieceEditor : EditorWindow
     {
         private const string SearchPattern = "p: t:prefab Assets/Prefabs/Game/Pieces -Piece_Base";
-        
+
         private const int MinCellSize = 128;
         private const int MaxCellSize = 200;
 
@@ -103,8 +103,16 @@ namespace Editor
                 return;
             }
 
-            var editor = UnityEditor.Editor.CreateEditor(_pieceToEdit);
-            editor.DrawPreview(GUILayoutUtility.GetRect(256, 256));
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            Rect previewRect = GUILayoutUtility.GetRect(256, 256);
+
+            Texture2D previewImage = AssetPreview.GetAssetPreview(_pieceToEdit.gameObject);
+            if (previewImage != null)
+                EditorGUI.DrawPreviewTexture(previewRect, previewImage);
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
 

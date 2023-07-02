@@ -1,6 +1,5 @@
 using System;
 using DG.Tweening;
-using ThirdParty;
 using ThirdParty.uiframework.Window;
 using UnityEngine;
 using UnityEngine.UI;

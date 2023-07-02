@@ -1,5 +1,3 @@
-using ThirdParty;
-
 namespace Game.Managers
 {
     public static class ScoreManager

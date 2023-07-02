@@ -4,15 +4,13 @@ using System.Linq;
 using Data;
 using Enums;
 using Game;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace Editor
 {
-    public class GameConfigEditor : OdinEditorWindow
+    public class GameConfigEditor : EditorWindow
     {
         private const string GameConfigFilePath = "GameConfig";
 
@@ -20,53 +18,89 @@ namespace Editor
         [SerializeField]
         private GameConfig _gameConfig;
 
-        [HideLabel]
-        [OnValueChanged("OnConfigChanged")]
+        private SerializedObject _serializedGameConfig;
+
         [SerializeField] private PieceWeightsDictionary _pieceWeightsDictionary;
 
-        [HideLabel]
-        [OnValueChanged("OnConfigChanged")]
-        [SerializeField] private PieceMovementConfig _pieceMovementConfig;
+        private SerializedProperty _pieceWeightsDictionaryProp;
+        private SerializedProperty _pieceMovementConfigProp;
+        private SerializedProperty _winLoseConditionConfigProp;
+        private SerializedProperty _cameraConfigProp;
 
-        [HideLabel]
-        [OnValueChanged("OnConfigChanged")]
-        [SerializeField] private WinLoseConditionConfig _winLoseConditionConfig;
-
-        [HideLabel]
-        [OnValueChanged("OnConfigChanged")]
-        [SerializeField] private CameraConfig _cameraConfig;
-
-        [OnValueChanged("OnConfigChanged")]
-        [SerializeField] private int _distanceBetweenBoards;
-
-        public void Init()
+        [MenuItem("Tools/Game Config Editor")]
+        public static void ShowWindow()
         {
-            _gameConfig = Resources.Load<GameConfig>(GameConfigFilePath);
-
-            _pieceWeightsDictionary = _gameConfig.PieceWeightsDictionary;
-            _pieceMovementConfig = _gameConfig.PieceMovementConfig;
-            _winLoseConditionConfig = _gameConfig.WinLoseConditionConfig;
-            _cameraConfig = _gameConfig.CameraConfig;
-            _distanceBetweenBoards = _gameConfig.DistanceBetweenBoards;
-
-
-            OnClose -= OnClosed;
-            OnClose += OnClosed;
+            var window = GetWindow<GameConfigEditor>("Game Config Editor");
+            window.ShowPopup();
         }
 
+        private void OnEnable()
+        {
+            _gameConfig = Resources.Load<GameConfig>(GameConfigFilePath);
+            _serializedGameConfig = new SerializedObject(_gameConfig);
 
-        private void OnClosed()
+            FindProperties();
+        }
+
+        private void FindProperties()
+        {
+            _pieceWeightsDictionaryProp = _serializedGameConfig.FindProperty("_pieceWeightsDictionary");
+            _pieceMovementConfigProp = _serializedGameConfig.FindProperty("_pieceMovementConfig");
+            _winLoseConditionConfigProp = _serializedGameConfig.FindProperty("_winLoseConditionConfig");
+            _cameraConfigProp = _serializedGameConfig.FindProperty("_cameraConfig");
+        }
+
+        private void OnGUI()
+        {
+            if (_serializedGameConfig == null)
+                return;
+
+            _serializedGameConfig.Update();
+
+            EditorGUILayout.BeginVertical("box");
+            // Piece Weights Dictionary
+            EditorGUILayout.PropertyField(_pieceWeightsDictionaryProp, true);
+            if (GUILayout.Button("Reset Dictionary"))
+            {
+                ResetDictionary();
+            }
+
+            EditorGUILayout.EndVertical();
+
+
+            // Piece Movement Config
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField("Piece Movement Config", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_pieceMovementConfigProp.FindPropertyRelative("horizontalMoveSpeed"));
+            EditorGUILayout.PropertyField(_pieceMovementConfigProp.FindPropertyRelative("_horizontalMoveStep"));
+            EditorGUILayout.PropertyField(_pieceMovementConfigProp.FindPropertyRelative("_verticalMoveSpeed"));
+            EditorGUILayout.PropertyField(_pieceMovementConfigProp.FindPropertyRelative("_verticalFastMoveSpeed"));
+            EditorGUILayout.EndVertical();
+
+            // Win & Lose Conditions
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField("Win & Lose Conditions", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_winLoseConditionConfigProp.FindPropertyRelative("_allowedMistakeCount"));
+            EditorGUILayout.PropertyField(_winLoseConditionConfigProp.FindPropertyRelative("_targetHeight"));
+            EditorGUILayout.EndVertical();
+
+            // Camera Configs
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField("Camera Config", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(
+                _cameraConfigProp.FindPropertyRelative("_additionalVerticalOffsetSingleMode"));
+            EditorGUILayout.PropertyField(
+                _cameraConfigProp.FindPropertyRelative("_additionalVerticalOffsetVersusMode"));
+            EditorGUILayout.EndVertical();
+
+            _serializedGameConfig.ApplyModifiedProperties();
+        }
+
+        private void OnDestroy()
         {
             AssetDatabase.SaveAssetIfDirty(_gameConfig);
         }
 
-        private void OnConfigChanged()
-        {
-            _gameConfig.DistanceBetweenBoards = _distanceBetweenBoards;
-            EditorUtility.SetDirty(_gameConfig);
-        }
-
-        [Button, BoxGroup("Piece Weights")]
         private void ResetDictionary()
         {
             var existingPieces = AssetDatabase.FindAssets($"t:Prefab Piece_")
@@ -75,15 +109,16 @@ namespace Editor
                 .Select(piece => piece.GetComponent<Piece>())
                 .Where(pieceComponent => pieceComponent != null);
 
-
-            _pieceWeightsDictionary = new PieceWeightsDictionary();
+            _gameConfig.PieceWeightsDictionary = new PieceWeightsDictionary();
 
             foreach (var existingPiece in existingPieces)
             {
-                _pieceWeightsDictionary.TryAdd(existingPiece.PieceType, 1);
+                _gameConfig.PieceWeightsDictionary.TryAdd(existingPiece.PieceType, 1);
             }
 
             EditorUtility.SetDirty(this);
+
+            Repaint();
         }
 
 
@@ -116,5 +151,10 @@ namespace Editor
                 EditorUtility.SetDirty(gameConfig);
             }
         }
+    }
+
+    [CustomPropertyDrawer(typeof(PieceWeightsDictionary))]
+    public class CustomPieceWeightDictionaryDrawer : SerializableDictionaryPropertyDrawer
+    {
     }
 }
